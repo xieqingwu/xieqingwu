@@ -1,0 +1,469 @@
+du -sh * 查看当前目录下所有子目录和文件的汇总大小
+普通用户使用sudo来执行root权限的命令
+
+如，将Hadoop用户添加到sudoers文件中去
+
+ vi /etc/sudoers
+1
+2
+1
+2
+root ALL=(ALL) ALL 
+hadoop ALL=(ALL) ALL
+df -h 查看磁盘空间状态信息
+
+free 查看内存使用状况 后面加个m 就是带个单位撒
+
+top 查看实时刷新的系统进程信息
+
+sudo vi /etc/sysconfig/network-scripts/ifcfg-eth0 修改该配置文件即可改ip地址 
+或者在root权限下用setup指令通过一个带提示的伪图形界面来修改
+查看ip地址
+ifconfig
+
+sudo vi /etc/sysconfig/network 修改其中的hostname配置项 
+
+管理内网的”主机名—ip地址”本地映射
+sudo vi /etc/hosts
+
+root权限下 service network restart 
+关闭防火墙服务 service iptables stop 
+关闭防火墙自动启动 chkconfig iptables off
+
+查看我们系统中有哪些服务在监听哪些端口。
+netstat -nltp
+
+修改系统的默认启动级别
+vi /etc/inittab
+
+然后修改环境变量 sudo vi /etc/profile 
+在文件的最后添加以下两行
+
+export JAVA_HOME=/usr/jdk1.7.0_65
+export PATH=$PATH:$JAVA_HOME/bin
+1
+2
+1
+2
+然后 source /etc/profile 来生效 
+
+mysql
+
+RPM软件包安装
+
+--yum install mysql （网络在线安装）
+1
+1
+1.可以编译源码来安装 
+2.用redhat发布的一种标准软件安装包进行安装 RPM包 
+redhat 公司的RPM方式的包管理 也是很常用的软件包管理器
+
+rpm -qa | grep MySQL 
+sudo rpm -e mysql-libs-5.1.66-2.el6_3.i686 –nodeps 
+sudo rpm -ivh MySQL-server-5.1.73-1.glibc23.i386.rpm
+
+service iptables status可以查看到iptables服务的当前状态
+
+一 防火墙配置文件及命令
+(I)Red Hat Linux系统
+此类型系统包括red hat的各类衍生及相关不版本，包括RHEL、CentOS、Fedora等等。
+防火墙配置文件： /etc/sysconfig/iptables
+服务操作命令 ： /etc/init.d/iptables service iptables {start|stop...}
+临时改变命令 ： iptables iptables-save iptables-restore等
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ssh-keygen
+ssh-copy-id xqw@10.135.0.179
+vim .ssh/config
+git remote add --mirror=push g1 ssh://10.135.0.179:/home/xqw/gznx.git
+git push g1
+vim .git/config 
+ssh 10.135.0.179
+chmod 700 config 
+
+
+git log 有许多选项可以帮助你搜寻感兴趣的提交，接下来我们介绍些最常用的。
+
+我们常用 -p 选项展开显示每次提交的内容差异，用 -2 则仅显示最近的两次更新：
+
+$ git log -p -2
+
+在做代码审查，或者要快速浏览其他协作者提交的更新都作了哪些改动时，就可以用这个选项。此外，还有许多摘要选项可以用，比如 --stat，仅显示简要的增改行数统计：
+
+$ git log --stat 
+
+每个提交都列出了修改过的文件，以及其中添加和移除的行数，并在最后列出所有增减行数小计。还有个常用的 --pretty 选项，可以指定使用完全不同于默认格式的方式展示提交历史。比如用oneline 将 每个提交 放在一行显示，这在提交数很大时非常有用。另外还有short，full 和fuller 可以用，展示的信息或多或少有些不同，请自己动手实践一下看看效果如何。
+
+$ git log --pretty=oneline
+ca82a6dff817ec66f44342007202690a93763949 changed the version number
+085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7 removed unnecessary test code
+a11bef06a3f659402fe7563abf99ad00de2209e6 first commit
+但最有意思的是 format，可以定制要显示的记录格式，这样的输出便于后期编程提取分析，像这样：
+
+$ git log --pretty=format:"%h - %an, %ar : %s"
+ca82a6d - Scott Chacon, 11 months ago : changed the version number
+085bb3b - Scott Chacon, 11 months ago : removed unnecessary test code
+a11bef0 - Scott Chacon, 11 months ago : first commit
+表 2-1 列出了常用的格式占位符写法及其代表的意义。
+
+选项	 说明
+%H	提交对象（commit）的完整哈希字串
+%h	提交对象的简短哈希字串
+%T	树对象（tree）的完整哈希字串
+%t	树对象的简短哈希字串
+%P	父对象（parent）的完整哈希字串
+%p	父对象的简短哈希字串
+%an	作者（author）的名字
+%ae	作者的电子邮件地址
+%ad	作者修订日期（可以用 -date= 选项定制格式）
+%ar	作者修订日期，按多久以前的方式显示
+%cn	提交者(committer)的名字
+%ce	提交者的电子邮件地址
+%cd	提交日期
+%cr	提交日期，按多久以前的方式显示
+%s	提交说明
+你一定奇怪_作者（author）_和_提交者（committer）_之间究竟有何差别，其实作者指的是实际作出修改的人，提交者指的是最后将此工作成果提交到仓库的人。所以，当你为某个项目发布补丁，然后某个核心成员将你的补丁并入项目时，你就是作者，而那个核心成员就是提交者。我们会在第五章再详细介绍两者之间的细微差别。
+
+用 oneline 或 format 时结合 --graph 选项，可以看到开头多出一些 ASCII 字符串表示的简单图形，形象地展示了每个提交所在的分支及其分化衍合情况。在我们之前提到的 Grit 项目仓库中可以看到：
+
+、git-svn clone svn_repository
+2、修改本地代码，使用git add/commit将修改提交到本地git库
+3、定期使用git-svn rebase获取中心svn repository的更新
+4、使用git-svn dcommit命令将本地git库的修改同步到中心svn库
+
+1.初始化仓库
+初始化仓库有两种情况，一种是直接在一个空目录里建立一个项目，这时候你可以这样干：
+git init
+另一种是从其他机器复制一个仓库，比如这样：
+git clone git://git2.kernel.org/pub/scm/git/git.git (远程仓库)
+git clone https://github.com/jQuery/jquery.git (远程仓库)
+git clone git@github.com:wengpingbo/MicroBlog.git (远程仓库)
+git clone /home/oss/test.git (本地仓库)
+第一次从服务器上复制一个仓库，可能比较慢，因为git要把所有的历史记录和版本全部复制下来，这也算git的一个弊端吧！
+复制完后，就会在当前目录下生成一个工作目录，名字以仓库名字命名。如果你不想指定目录，那就在上面的命令后加一个目录就ok了。比如我想把test仓库放到oss仓库中：git clone /home/oss/test.git oss
+之后，你就可以开始你的工作啦！
+2.添加文件
+在编辑了几个文档之后，你可能突然想起来，好像文件还没有让git跟踪。Git并不会实时的跟踪你的文件，只在你明确让它记录你的文件时，它才会把指定的文件的当前状态记录到仓库中去，然后又撒手不管了。我想这就是说git笨的原因吧。这个时候，你需要手动添加你的文件当暂存区域：
+git add filename1 filename2
+如果你懒得一个一个加，你可以试试这个：
+git add -A
+它会把当前目录下所有的文件都添加到暂存区域。
+3.添加一个版本
+在添加完文件后，你可能觉得应该创建一个commit了。
+git commit
+怎么样？是不是有点不对劲，好像这个命令并没有按你想象的那样跳出一个提交成功的提示，而是直接跑到了你在配置中指定的编辑器中了。仔细看一下，原来是让你给这个版本做一些备注，随便写点什么，然后保存退出就ok了。如果你不想这么麻烦，可以这么干：
+git commit -m ‘initial version’
+可能你觉得之前讲的太罗嗦了，提交一个commit还这么麻烦，其实有一个捷径可以使你跳过添加文件这个过程：
+git commit -a -m ‘initial version’
+大功告成，这个命令会把之前所有的已经添加的文件都加入到这个版本中。
+可能你又有疑问了，之前添加的文件不是自动会加入到下一个版本中吗，问什么还加这个-a参数？
+其实git add命令只是把指定文件的当前状态添加到暂存区域，并不代表一个文件一旦添加，就会一直存在每个版本中。如果你添加一个文件后对这个又进行了修改，在你commit时候，只会commit这个文件添加时的状态，不会把之后的修改也commit进去，除非你再次添加。
+4.推送变更
+在你commit完之后，你可能想把自己的代码提交到github或者其他git服务器上，与他人交流共享，这时候就需要和远程服务器打交道了。
+如果你是在本地建立起的仓库，默认情况下是没有任何服务器地址的，如果你是从其他服务器复制过来的仓库，这个服务器地址会自动添加到你的仓库中，你可以这样查看：
+git remote -v
+如果只输入”git remote”，就只会列出服务器端的别名，不会列出地址来。
+一个仓库可以有多个服务器地址，这就意味着，你可以从不同的人手中复制同一个仓库，但这并不会打乱你自己的分支，哪怕双方的分支名字都一样。假如你现在在和另外两个人做同一个项目中的同一个分支，你发现A的一个模块正是你想要的，你想把他的代码合并到你现在的版本中，这时候你可以这样做：
+git remote add code_a git://url/test.git  //添加对方的地址,code_a是别名
+git fetch code_a  //复制对方的仓库到本地，但不合并，git pull会自动合并
+git merge code_a/master //把对方master分支合并到自己当前版本下
+合并完之后，你可能想提交你的代码到其他的服务器上，这时候你可以先把要提交的服务器地址添加进来，然后这样做：
+git push origin master
+上面的命令就是把自己master的分支提交到名字为origin的服务器上
+5.创建并管理分支
+在做项目的时候，你可能会想写一些扩展性的功能，或者做一些小实验，但是你又不想影响你现在的项目。这时候，你可以创建一个分支，然后在这个分支里写东西，当觉得不好的时候，你可以把这个分支删除掉，对你之前的主分支没有任何影响。或者你觉得这个新特性超出了自己的预想，可以合并到主分支里，这时候你只要把工作转回主分支，然后合并分支，最后删除分支，然后就跟那个分支没创建一样。具体操作如下：
+git branch test  //创建一个test分支
+git checkout test  //转到test分支
+edit something...commit something...
+git checkout master  //转到master分支
+git merge test  //合并test分支
+git checkout -b test2  //创建test2分支，并转到test2分支
+git branch -d test //删除test分支
+git branch  //列出分支列表
+git branch -v  //列出分支列表和当前commit
+Git merge的实质是把两个版本合在一起，然后在当前分支创建一个新的commit，如果你在两个分支的同一个文件的同一个地方都做了修改，这时候merge就会失败，git就不会自动创建一个新的commit，而是直接停住。你需要手动修改这些冲突的文件，选择这两个分支中的一个版本，或者自己重写这个部分，然后手动添加这些文件到暂存区域，再commit一下就ok了。要查看哪些文件冲突了，可以用”git status”查看。
+6.撤消改动
+是人就会犯错。当你执行某个命令之后，突然发现，自己写错了，或者漏了一个文件，这时候怎么办？
+如果你提交得太早，忘了添加某些文件，你可以这样做：
+git commit -m ‘add something ’
+git add file1
+git commit --amend
+最后一个命令会把你当前暂存区域最为上一次的commit。如果你commit以后，马上amend，这时候git会直接跳到编辑commit备注里面，这样你可以修改你上次commit的备注。
+如果你添加了不该添加的文件，你可以这样挽回：
+git add . //把所有的文件都添加进去
+git reset HEAD readme  //把readme文件从暂存区域去除
+如果你发现你编辑错了一个文件，你想把它恢复到上一个版本的状态，这时候你可以这样：
+git checkout -- filename1 //只撤消这一个文件
+如果你觉得这个版本糟糕透了，想完全回滚到上一个版本，你可以干如下事情：
+git reset --hard HEAD^
+HEAD是指向当前版本，^指当前版本的父版本，这个操作无法撤消。你可以把--hard换成--soft，这只会回退commit信息。还有一个--mixed默认选项，大家可以参考官方文档，查看这3个选项的具体区别。
+6、GIT常用命令
+Git add
+Git clone
+Git commit
+Git push
+Git checkout
+Git reset
+Git pull
+Git status
+Git branch
+//advanced
+Git tag
+Git log
+Git merge
+.用管理员方式打开cmd
+
+2.首先通过pip命令安装wheel 
+如果提示’pip’不是内部或外部命令，也不是可运行的程序或批处理文件
+
+①将python安装目录下的scripts目录（例如D:\Python27\Scripts）添加到系统环境变量path里，注意前加分号。再执行该命令
+
+pip install wheel
+
+②在cmd下进入到D:\Python27\Scripts目录下执行该命令
+
+pip install wheel
+3.安装whl文件
+
+①如果将D:\Python27\Scripts目录添加到path中，可以直接在whl文件所在目录用管理员打开一个cmd窗口，直接执行下面的语句。
+
+pip install python_dateutil-2.5.3-py2.py3-none-any.whl
+
+②否则的话，需要在D:\Python27\Scripts目录下用管理员打开cmd，运行pip命令，文件名应该写全路径）
+
+pip install C:\Users\xxx\Downloads\python_dateutil-2.5.3-py2.py3-none-any.whl
+
+如果使用python的主要目的是为了进行科学计算、数据分析、爬虫等项目，强烈推荐使用Anaconda而不是其他IDE。
+Anaconda在python语言外，还集成了numpy、scipy、matplotlib等科学计算包，以及beautiful-soup、requests、lxml等网络相关包。
+安装Anaconda后，基本不再需要费劲地安装其他第三方库了。
+Windows下安装python的scipy等科学计算包
+END
+如果一定要死磕
+一个基本可以应用到其他IDE、其他第三方库的通用安装方法如下：
+首先，确保在pip外，还安装了wheel库。如果没有：打开cmd，输入pip install wheel进行安装。
+Windows下安装python的scipy等科学计算包
+此方法通过二进制文件安装第三方库，需要在安装前确定好能够安装的版本。
+确认方法如下：
+在cmd中，输入python进入python（也可在IDE中进行）。
+然后输入import pip;print(pip.pep425tags.get_supported())，界面上输出当前python的版本信息，如图。
+Windows下安装python的scipy等科学计算包
+在www.lfd.uci.edu/%7Egohlke/pythonlibs/上找到相应的whl文件，下载到本地。注意上图中标注的版本信息，应从网页上下载对应的版本为：XXXX-cp35-cp35m-win_amd64.whl
+在此处，scipy对应的安装包为scipy?0.18.1?cp35?cp35m?win_amd64.whl（请替换为你的可安装版本）。注意，scipy依赖于numpy+mkl，安装scipy前需要先安装好numpy+mkl。
+Windows下安装python的scipy等科学计算包
+即使你在此前已经安装过numpy，也请从该页面中找到numpy+mkl的whl，下载到本地，因为重点在于mkl而不是numpy。
+Windows下安装python的scipy等科学计算包
+通过whl安装库的方法如下：
+进入whl文件下载到的文件夹位置，按住shift键的同时，点击鼠标右键，在弹出菜单中选择“在此处打开命令窗口”。
+在打开的命令窗口中，输入pip install +whl文件的全名，安装whl。
+安装numpy+mkl，输入pip install numpy?1.12.0b1+mkl?cp35?cp35m?win_amd64.whl，按Enter后，等待安装完成。（注意将文件名替换为你的可用版本的名称）
+Windows下安装python的scipy等科学计算包
+安装scipy，输入pip install scipy?0.18.1?cp35?cp35m?win_amd64.whl，按Enter后，等待安装完成。（注意将文件名替换为你的可用版本的名称）
+Windows下安装python的scipy等科学计算包
+进入python，输入import scipy，未报错，即表示安装成功。
+Windows下安装python的scipy等科学计算包
+
+三、 Git常用命令
+（1）git branch 　查看本地分支
+ 
+（2）git branch -a  　　　　  查看远程分支
+ 
+（3）git checkout  branchname       切换分支　
+ 
+（4）git add　yourfile　　　　  
+ 
+（5）git commit -a -m "描述"　　    提交你当前开发到暂存区，可以理解为你本地的GIT库
+ 
+（6）git pull　  更新，如果几个人同时在一个分枝上开发，可能会造成不同步，造成自己本地的GIT库落后或提前远程GIT库，这时候就要更新自己本地的库。
+ 
+（7）git push　提交，将自己开发的代码提交到对应的远程分之上去
+ 
+（8）git status  查看工作区状态，及查看在此分支上进行了那些操作
+ 
+（9）git log　　查看操作日志，还是挺有用的
+ 
+（10）git merge 合并分支，自己开发的模块最终要合并到项目的总分枝上去，这是要先切换到项目总分支，然后 git merge 自己的分支 
+ 
+（11）git branch -d/D   yourbranch  删除本地分支
+ 
+（12）git push origin :yourbranch    删除远程分支
+
+
+ubuntu系统，使用apt-get install git即可安装
+
+centos  yum install git
+
+2. 设置Git
+
+在能够使用Git进行工作之前，我们需要进行一次性的配置。为了能让Git能够跟踪谁做了修改，我们需要设置你的用户名。
+
+git config --global user.name "bear2flymoon"
+
+git config --global user.email bear2flymoon@gmail.com
+
+这里我的用户名就设置为：bear2flymoon
+
+邮箱为：bear2flymoon@gmail.com(谷歌被墙，无法登陆)
+
+ 
+
+3. 创建一个本地代码库
+
+假设我们的代码写在机器的/home/bear2flymoon文件夹下的’test'文件夹内。在命令行输入下列命令：
+
+cd /home/bear2flymoon/test/
+
+下面，我们需要告诉Git这个文件夹是我们需要跟踪的项目。所以我们在该目录下输入以下命令来初始化一个新的本地Git代码库
+
+git init
+
+Git会在test文件夹下创建一个名为.git的隐藏文件夹，这就是你的本地代码库。
+
+ 
+
+4. 暂存（stage)文件
+
+我们需要暂存(stage)test文件夹下所有项目文件，输入以下命令:
+
+git add .
+
+最后的“.”符号的意思是“所有文件、文件夹和子文件夹”。假如我们只需要把特定文件添加到源代码控制中去，我们可以指定它们：
+
+git add my_file,my_other_file
+
+ 
+
+5. 提交文件
+
+现在，我们想要提交已经暂存（staged）的文件。我们提交我们的文件时，总是附带着有意义的注释，描述它们现在的状态。我一直用“initial commit"来描述我的第一个提交的注释。
+
+git commit -m "initial commit"
+
+同样，你随时可以回滚到这个提交状态。如果你需要检查现在已暂存和未暂存文件的状态、提交等，你可以输入以下命令询问git的状态：
+
+git status
+
+ 
+
+6. 创建分支
+
+创建分支是你创建代码独立版本的动作，这个新分支独立于你的主干。默认的，每次你提交到Git的代码都会被存储到”master（主干）”分支。
+
+现在，比如我们想向项目中添加一个功能，但我们又想要能够回滚到现在的版本，为了防止出现差错，或者我们会最终放弃这个功能。这时候，我们就可以创建分支并切换到新建的分支，发送命令：
+
+git checkout -b new_feature
+
+或者先创建一个分支，然后切换
+
+git branch new_feature
+
+git checkout new_feature
+
+要看项目下所有的分支，发送命令：
+
+git branch
+
+现在你可以在你的项目上无所顾忌地做任何你想做的：任何时候，你都可以回到你创建分支前的状态。注意，你同时可以有多个分支，甚至可以从一个分支上再创建一个分支。
+
+ 
+
+7. 合并分支
+
+当我们对新功能满意的时候，我们想要把它加到主干分支上。当我们在的新功能分支上时，我们首先需要加载并且提交文件：
+
+git add .
+
+git commit -m "adds my new feature"
+
+然后移到主干分支：
+
+git checkout master
+
+像这样合并：
+
+git merge new_feature
+
+此时，我们的主干分支和新功能分支会变成一样。
+
+ 
+
+8. 丢弃并删除分支
+
+当我们想要丢弃并删除一个分支时，首先加载我们的文件并且在分支里提交：
+
+git add .
+
+git commit -m "feature to be discarded"
+
+然后，移到主干分支
+
+git checkout master
+
+然后发送删除命令
+
+git branch -d new_featrue
+
+假如修改已经合并了，它只会删除分支。假如分支没有合并，我们会得到一个错误信息。删除一个未合并的分支（通常我们不想保留的修改），我们需要发送一样的命令附带一个大写D。意思是“强制删除分支，无论如何我不想要它了。”：
+
+git branch -D new_feature
+
+ 
+
+9. 回滚到之前提交的状态
+
+在某些情况下，我们可能想要回到之前的代码版本。首先，我们需要找到想回到到哪个版本。需要查看所有完成的提交，发送命令：
+
+git log
+
+输出提交的历史记录
+
+commit ca82a6dff817ec66f44342007202690a93763949Author: your_username your_email@domain.comDate:   Mon Nov 4 12:52:11 2013 -0700    changes the frontpage layout
+commit 085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7Author: your_username your_email@domain.comDate:   Mon Nov 4 11:40:33 2013 -0700    adds my new feature
+commit a11bef06a3f659402fe7563abf99ad00de2209e6Author: your_username your_email@domain.comDate:   Mon Nov 4 10:37:28 2013 -0700    initial commit
+如果我们想回到“adds my new feature"这个提交，简单的使用提交的ID做签出（checkout）(通常只用ID的开头9个字母)
+
+git checkout 085bb3bcb
+
+我们也可以签出一个新的分支
+
+git checkout -b my_previous_version 085bb3bcb
+
+只是别太疯狂了！分支越复杂，我们就越难确定我们在做什么。
+
+ 
+
+10. 别名
+
+Git允许我们为常用的命令创建快捷方式（别名）。例如，如果我们不想每次都输入git commit -m “some comment”，而是输入git c “some comment”，我们可以向git全局配置里添加一个别名来实现，像这样：
+
+git config --global alias.c 'commit -m'
+这是我使用的别名列表：
+git config --global alias.c 'commit -m'
+git config --global alias.co 'checkout'
+git config --global alias.cob 'checkout -b'
+git config --global alias.br 'branch'
+git config --global alias.m 'merge'
+git config --global alias.a 'add .'
+git config --global alias.s 'status'
+git config --global alias.dbr 'branch -d'

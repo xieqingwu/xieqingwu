@@ -1,0 +1,326 @@
+
+#查询资源库中指定包的相关信息
+[root@localhost ~]# yum info php
+#查询资源库中所有可以安装或更新的rpm包的信息
+[root@localhost ~]# yum info 
+#查询资源库中所有可以更新的rpm包的信息
+[root@localhost ~]# yum info updates
+#查询已经安装的所有的rpm包的信息
+[root@localhost ~]# yum info installed
+#列出已经安装的但是不包含在资源库中的rpm包的信息
+[root@localhost ~]# yum info extras
+
+
+#列出资源库中所有可以安装或更新的rpm包
+[root@localhost ~]# yum list 
+#列出资源库中特定的可以安装或更新以及已经安装的rpm包
+[root@localhost ~]# yum list zip
+[root@localhost ~]# yum list zip*
+#注:可以在rpm包名中使用匹配符,如列出所有以zip开头的rpm包
+#列出资源库中所有可以更新的rpm包
+[root@localhost ~]# yum list updates
+#列出已经安装的所有的rpm包
+[root@localhost ~]# yum list installed
+#列出已经安装的但是不包含在资源库中的rpm包
+[root@localhost ~]# yum list extras
+
+搜索rpm包：search string1 [string2] [...]
+#搜索匹配特定字符的rpm包
+#search KEYWORD
+[root@localhost ~]# yum search php
+#注:在rpm包名,包描述等中搜索
+ 
+#搜索有包含特定文件名的rpm包
+#provides /PATH/TO/SOMEFILE
+[root@localhost ~]# yum provides p
+
+#清除暂存中rpm包文件
+[root@localhost ~]# yum clean packages
+#清除暂存中rpm头文件
+[root@localhost ~]# yum clean headers
+#清除暂存中包文件
+[root@localhost ~]# yum clean metadata 
+#清除暂存中过期数据
+[root@localhost ~]# yum clean expire-cache
+
+#包组列表
+[root@localhost packages]# yum grouplist
+.......
+Available Groups:
+   Compatibility Libraries
+   Console Internet Tools
+   Development Tools
+   Graphical Administration Tools
+   Legacy UNIX Compatibility
+   Scientific Support
+   Security Tools
+ 
+#包组信息
+[root@localhost packages]# yum group info  "Security Tools"
+ 
+#安装包组
+[root@localhost packages]# yum group install  "Security Tools"
+ 
+#卸载包组
+[root@localhost packages]# yum group remove "Security Tools"
+
+
+#repolist [all|enabled|disabled] 列出全部/可用/不可用仓库
+ 
+[root@localhost ~]# yum repolist enabled
+......
+
+
+#repoinfo [all|enabled|disabled] 列出全部/可用/不可用仓库信息
+ 
+[root@localhost ~]# yum repoinfo enabled
+
+
+
+1）下载repo文件 
+wget http://mirrors.aliyun.com/repo/Centos-7.repo
+
+2）备份并替换系统的repo文件 
+cp Centos-7.repo /etc/yum.repo.d/ 
+cd /etc/yum.repos.d/ 
+mv CentOS-Base.repo CentOS-Base.repo.bak 
+mv Centos-7.repo CentOS-Base.repo
+
+3）执行yum源更新命令 
+yum clean all 
+yum makecache 
+yum update
+
+
+.pull会使用git merge导致冲突，需要将冲突的文件resolve掉 git add -u, git commit之后才能成功pull.
+
+2.如果想放弃本地的文件修改，可以使用git reset --hard FETCH_HEAD，FETCH_HEAD表示上一次成功git pull之后形成的commit点。然后git pull.
+注意：
+
+git merge会形成MERGE-HEAD(FETCH-HEAD) 。git push会形成HEAD这样的引用。HEAD代表本地最近成功push后形成的引用。
+
+”
+
+就我的经验，有时候会莫名其妙地出现这种状况，而且Untracked files 还特别多（实际上自己可能只改了一两个文件），所以只好先保存好自己确定做出的local的修改，然后用git reset --hard FETCH_HEAD回到上次成功pull之后的点，然后再pull就没有问题了
+
+git status
+
+git clone gznx.xqw.git
+
+2，xargs配合grep查找
+
+find -type f -name '*.php'|xargs grep 'GroupRecord'
+
+1：more /etc/issue 命令查看
+2: lsb_release -a 命令查看
+cat /etc/redhat-release
+rpm -q redhat-release
+
+
+1.6g
+
+
+
+454M
+60k
+20K
+1.8g
+4k
+
+
+在使用CentOS6.3版本linux系统的时候，发现根目录(/)的空间不是很充足，而其他目录空间有很大的空闲，所以本文主要是针对现在已有的空间进行调整。首先，先来查看一下系统的空间分配情况： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# df -h  
+02.Filesystem            Size  Used Avail Use% Mounted on  
+03./dev/mapper/vg_centos-lv_root  
+04.                       50G   14G   34G  30% /  
+05.tmpfs                 1.9G     0  1.9G   0% /dev/shm  
+06./dev/sda1             485M   37M  423M   8% /boot  
+07./dev/mapper/vg_centos-lv_home  
+08.                      404G  670M  382G   1% /home  
+下面的详细步骤部分将从vg_centos-lv_home分区下取出100G的空间添加到/vg_centos-lv_root分区上去。 
+
+二、详细步骤 
+
+1、卸载vg_centos-lv_home分区 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# umount /home  
+此时在用df命令查看将会发现/home目录已经看不见了，如下所示： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# df -h  
+02.Filesystem            Size  Used Avail Use% Mounted on  
+03./dev/mapper/vg_centos-lv_root  
+04.                       50G   14G   34G  30% /  
+05.tmpfs                 1.9G     0  1.9G   0% /dev/shm  
+06./dev/sda1             485M   37M  423M   8% /boot  
+
+
+2、从新设定vg_home-lv_home的大小 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# resize2fs -p /dev/mapper/vg_centos-lv_home 282G  
+02.resize2fs 1.41.12 (17-May-2010)  
+03.Please run 'e2fsck -f /dev/mapper/vg_centos-lv_home' first.  
+这一步设定vg_home-lv_home大小没有成功，系统提示我们先运行下面的命令，操作如下： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# e2fsck -f /dev/mapper/vg_centos-lv_home  
+02.e2fsck 1.41.12 (17-May-2010)  
+03.Pass 1: Checking inodes, blocks, and sizes  
+04.Pass 2: Checking directory structure  
+05.Pass 3: Checking directory connectivity  
+06.Pass 4: Checking reference counts  
+07.Pass 5: Checking group summary information  
+08./dev/mapper/vg_centos-lv_home: 1386/26836992 files (0.9% non-contiguous), 1855856/107344896 blocks  
+从新设定vg_home-lv_home的大小： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# resize2fs -p /dev/mapper/vg_centos-lv_home 282G  
+02.resize2fs 1.41.12 (17-May-2010)  
+03.Resizing the filesystem on /dev/mapper/vg_centos-lv_home to 73924608 (4k) blocks.  
+04.Begin pass 2 (max = 43)  
+05.Relocating blocks             XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
+06.Begin pass 3 (max = 3276)  
+07.Scanning inode table          XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
+08.Begin pass 4 (max = 266)  
+09.Updating inode references     XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
+10.The filesystem on /dev/mapper/vg_centos-lv_home is now 73924608 blocks long.  
+检查是否成功： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# mount /home  
+02.[root@CentOS-78 /]#  
+03.[root@CentOS-78 /]# df -h  
+04.Filesystem            Size  Used Avail Use% Mounted on  
+05./dev/mapper/vg_centos-lv_root  
+06.                       50G   14G   34G  30% /  
+07.tmpfs                 1.9G     0  1.9G   0% /dev/shm  
+08./dev/sda1             485M   37M  423M   8% /boot  
+09./dev/mapper/vg_centos-lv_home  
+10.                      278G  663M  263G   1% /home  
+11.[root@CentOS-78 /]#  
+3、将lv_home逻辑分区减小到指定大小 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# lvreduce -L 282G /dev/mapper/vg_centos-lv_home  
+02.  WARNING: Reducing active and open logical volume to 282.00 GiB  
+03.  THIS MAY DESTROY YOUR DATA (filesystem etc.)  
+04.Do you really want to reduce lv_home? [y/n]: y  
+05.  Reducing logical volume lv_home to 282.00 GiB  
+06.  Logical volume lv_home successfully resized  
+07.[root@CentOS-78 /]#  
+我认为这个命令是将已经减少的100G空间拿到系统公共的区域，可以被其他分区加载和利用。 
+
+
+查询卷组的信息： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# vgdisplay  
+02.  --- Volume group ---  
+03.  VG Name               vg_centos  
+04.  System ID  
+05.  Format                lvm2  
+06.  Metadata Areas        1  
+07.  Metadata Sequence No  5  
+08.  VG Access             read/write  
+09.  VG Status             resizable  
+10.  MAX LV                0  
+11.  Cur LV                3  
+12.  Open LV               3  
+13.  Max PV                0  
+14.  Cur PV                1  
+15.  Act PV                1  
+16.  VG Size               465.27 GiB  
+17.  PE Size               4.00 MiB  
+18.  Total PE              119109  
+19.  Alloc PE / Size       86472 / 337.78 GiB  
+20.  Free  PE / Size       32637 / 127.49 GiB  
+21.  VG UUID               1k4ooN-RFV9-uyf1-uMYf-aERG-YaGs-ZNoSD6  
+
+
+Free PE / Size指定的应该是现在可在分配的空间。 
+4、增加vg_centos-lv_root分区的大小 
+将可用的空间添加到vg_centos-lv_root分区上面： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# lvextend -L +127.40G /dev/mapper/vg_centos-lv_root  
+02.  Rounding up size to full physical extent 127.40 GiB  
+03.  Extending logical volume lv_root to 177.40 GiB  
+04.  Logical volume lv_root successfully resized  
+05.[root@CentOS-78 /]#  
+从新设定该分区的大小： 
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# resize2fs -p /dev/mapper/vg_centos-lv_root  
+02.resize2fs 1.41.12 (17-May-2010)  
+03.Filesystem at /dev/mapper/vg_centos-lv_root is mounted on /; on-line resizing required  
+04.old desc_blocks = 4, new_desc_blocks = 12  
+05.Performing an on-line resize of /dev/mapper/vg_centos-lv_root to 46504960 (4k) blocks.  
+06.The filesystem on /dev/mapper/vg_centos-lv_root is now 46504960 blocks long.  
+5、再次查看分区大小 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# df -h  
+02.Filesystem            Size  Used Avail Use% Mounted on  
+03./dev/mapper/vg_centos-lv_root  
+04.                      175G   14G  153G   9% /  
+05.tmpfs                 1.9G     0  1.9G   0% /dev/shm  
+06./dev/sda1             485M   37M  423M   8% /boot  
+07./dev/mapper/vg_centos-lv_home  
+08.                      278G  663M  263G   1% /home  
+我们发现vg_centos-lv_root分区的空间已经增加了125G，之所以比lv_home减少的空间要多25G主要是由于我们把系统所有的可用的空间都加在了lv_root分区。 
+
+三、所遇到的问题 
+
+1、在卸载/home目录的时候失败 
+
+可先执行如下fuser命令，然后再umount即可： 
+
+
+
+
+[plain] view plaincopyprint? 
+01.[root@CentOS-78 /]# fuser -m /home  
+02.[root@CentOS-78 /]#  
+2、设定完lv_home的大小，再次mount该分区时，发现用df命令无法看到给分区，此时只要在mount一次即可 
+
+3、在设定lv_root的大小时，不要把Free PE / Size的空间全部都用上，这很可能会出现Free PE空间不足的现象，建议保留一点Free PE的空间。 
+

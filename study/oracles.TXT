@@ -1,0 +1,878 @@
+-数据操作
+
+　　SELECT --从数据库表中检索数据行和列
+
+　　INSERT --向数据库表添加新数据行
+
+　　DELETE --从数据库表中删除数据行
+
+　　UPDATE --更新数据库表中的数据
+
+--数据定义
+
+　　CREATE TABLE --创建一个数据库表
+
+　　DROP TABLE --从数据库中删除表
+
+　　ALTER TABLE --修改数据库表结构
+
+　　CREATE VIEW --创建一个视图
+
+　　DROP VIEW --从数据库中删除视图
+
+　　CREATE INDEX --为数据库表创建一个索引
+
+　　DROP INDEX --从数据库中删除索引
+
+　　CREATE PROCEDURE --创建一个存储过程
+
+　　DROP PROCEDURE --从数据库中删除存储过程
+
+　　CREATE TRIGGER --创建一个触发器
+
+　　DROP TRIGGER --从数据库中删除触发器
+
+　　CREATE SCHEMA --向数据库添加一个新模式
+
+　　DROP SCHEMA --从数据库中删除一个模式
+
+　　CREATE DOMAIN --创建一个数据值域
+
+　　ALTER DOMAIN --改变域定义
+
+　　DROP DOMAIN --从数据库中删除一个域
+
+--数据控制
+
+　　GRANT --授予用户访问权限
+
+　　DENY --拒绝用户访问
+
+　　REVOKE --解除用户访问权限
+
+　　--事务控制
+
+　　COMMIT --结束当前事务
+
+　　ROLLBACK --中止当前事务
+
+　　SET TRANSACTION --定义当前事务数据访问特征
+
+　　--程序化SQL
+
+　　DECLARE --为查询设定游标
+
+　　EXPLAN --为查询描述数据访问计划
+
+　　OPEN --检索查询结果打开一个游标
+
+　　FETCH --检索一行查询结果
+
+　　CLOSE --关闭游标
+
+　　PREPARE --为动态执行准备SQL 语句
+
+　　EXECUTE --动态地执行SQL 语句
+
+　　DESCRIBE --描述准备好的查询
+
+　　---局部变量
+
+　　declare @id char(10)
+
+　　--set @id = '10010001'
+
+　　select @id = '10010001'
+
+---全局变量
+
+　　---必须以@@开头
+
+　　--IF ELSE　　
+
+declare @x int @y int @z int 
+　　select @x = 1 @y = 2 @z=3 
+　　if @x > @y 
+　　print 'x > y' --打印字符串'x > y' 
+　　else if @y > @z 
+　　print 'y > z' 
+　　else print 'z > y'
+　　--CASE　　
+
+use pangu 
+　　update employee 
+　　set e_wage = 
+　　case 
+　　when job_level = ’1’ then e_wage*1.08 
+　　when job_level = ’2’ then e_wage*1.07 
+　　when job_level = ’3’ then e_wage*1.06 
+　　else e_wage*1.05 
+　　end
+　　--WHILE CONTINUE BREAK　　
+
+declare @x int @y int @c int 
+　　select @x = 1 @y=1 
+　　while @x < 3 
+　　begin 
+　　print @x --打印变量x 的值 
+　　while @y < 3 
+　　begin 
+　　select @c = 100*@x + @y 
+　　print @c --打印变量c 的值 
+　　select @y = @y + 1 
+　　end 
+　　select @x = @x + 1 
+　　select @y = 1 
+　　end
+
+--WAITFOR
+
+　　--例 等待1 小时2 分零3 秒后才执行SELECT 语句　 
+
+waitfor delay ’01:02:03’ 
+　　select * from employee
+　　--例 等到晚上11 点零8 分后才执行SELECT 语句　　
+
+waitfor time ’23:08:00’ 
+　　select * from employee
+　　***SELECT***　
+
+select *(列名) from table_name(表名) where column_name operator value 
+　　ex:(宿主) 
+　　select * from stock_information where stockid = str(nid) 
+　　stockname = 'str_name' 
+　　stockname like '% find this %' 
+　　stockname like '[a-zA-Z]%' --------- ([]指定值的范围) 
+　　stockname like '[^F-M]%' --------- (^排除指定范围) 
+　　--------- 只能在使用like关键字的where子句中使用通配符) 
+　　or stockpath = 'stock_path' 
+　　or stocknumber < 1000 
+　　and stockindex = 24 
+　　not stock*** = 'man' 
+　　stocknumber between 20 and 100 
+　　stocknumber in(10,20,30) 
+　　order by stockid desc(asc) --------- 排序，desc-降序，asc-升序 
+　　order by 1,2 --------- by列号 
+　　stockname = (select stockname from stock_information where stockid = 4)
+　　--------- 子查询
+
+　　--------- 除非能确保内层select只返回一个行的值，
+
+　　--------- 否则应在外层where子句中用一个in限定符　
+
+select distinct column_name form table_name --------- distinct指定检索独有的列值，不重复 
+　　select stocknumber ,stocknumber + 10 = stocknumber + 10 from table_name 
+　　select stockname , stocknumber = count(*) from table_name group by stockname
+　　--------- group by 将表按行分组,指定列中有相同的值　　
+
+having count(*) = 2 --------- having选定指定的组 
+　　select * 
+　　from table1, table2 
+　　where table1.id *= table2.id -------- 左外部连接，table1中有的而table2中没有得以null表示 
+　　table1.id =* table2.id -------- 右外部连接 
+　　select stockname from table1 
+　　union [all] ----- union合并查询结果集，all-保留重复行 
+　　select stockname from table2
+ 
+
+***insert***　　
+
+insert into table_name (Stock_name,Stock_number) value (xxx,xxxx) 
+　　value (select Stockname , Stocknumber from Stock_table2)---value为select语句
+　　***update***　　
+
+update table_name set Stockname = xxx [where Stockid = 3] 
+　　Stockname = default 
+　　Stockname = null 
+　　Stocknumber = Stockname + 4
+　　***delete***　　
+
+delete from table_name where Stockid = 3 
+　　truncate table_name ----------- 删除表中所有行，仍保持表的完整性 
+　　drop table table_name --------------- 完全删除表
+　　***alter table*** --- 修改数据库表结构　　
+
+alter table database.owner.table_name add column_name char(2) null ..... 
+　　sp_help table_name ---- 显示表已有特征 
+　　create table table_name (name char(20), age smallint, lname varchar(30)) 
+　　insert into table_name select ......... ----- 实现删除列的方法(创建新表) 
+　　alter table table_name drop constraint Stockname_default ---- 删除Stockname的default约束
+　　***function(/*常用函数*/)***
+
+　　----统计函数----
+
+　　***G --求平均值
+
+　　COUNT --统计数目
+
+　　MAX --求最大值
+
+　　MIN --求最小值
+
+　　SUM --求和
+
+　　--***G　
+
+use pangu 
+　　select avg(e_wage) as dept_avgWage 
+　　from employee 
+　　group by dept_id
+　--MAX
+　　--求工资最高的员工姓名
+
+use pangu 
+　　select e_name 
+　　from employee 
+　　where e_wage = 
+　　(select max(e_wage) 
+　　from employee)
+　　--STDEV()
+
+　　--STDEV()函数返回表达式中所有数据的标准差
+
+　　--STDEVP()
+
+　　--STDEVP()函数返回总体标准差
+
+　　--VAR()
+
+　　--VAR()函数返回表达式中所有值的统计变异数
+
+　　--VARP()
+
+　　--VARP()函数返回总体变异数
+
+　　----算术函数----
+
+　　/***三角函数***/
+
+　　SIN(float_expression) --返回以弧度表示的角的正弦
+
+　　COS(float_expression) --返回以弧度表示的角的余弦
+
+　　TAN(float_expression) --返回以弧度表示的角的正切
+
+　　COT(float_expression) --返回以弧度表示的角的余切
+
+/***反三角函数***/
+
+　　ASIN(float_expression) --返回正弦是FLOAT 值的以弧度表示的角
+
+　　ACOS(float_expression) --返回余弦是FLOAT 值的以弧度表示的角
+
+　　ATAN(float_expression) --返回正切是FLOAT 值的以弧度表示的角
+
+　　ATAN2(float_expression1,float_expression2)
+
+　　--返回正切是float_expression1 /float_expres-sion2的以弧度表示的角
+
+　　DEGREES(numeric_expression)
+
+　　--把弧度转换为角度返回与表达式相同的数据类型可为
+
+　　--INTEGER/MONEY/REAL/FLOAT 类型
+
+　　RADIANS(numeric_expression) --把角度转换为弧度返回与表达式相同的数据类型可为
+
+　　--INTEGER/MONEY/REAL/FLOAT 类型
+
+　　EXP(float_expression) --返回表达式的指数值
+
+　　LOG(float_expression) --返回表达式的自然对数值
+
+　　LOG10(float_expression)--返回表达式的以10 为底的对数值
+
+　　SQRT(float_expression) --返回表达式的平方根
+
+　　/***取近似值函数***/
+
+　　CEILING(numeric_expression) --返回>=表达式的最小整数返回的数据类型与表达式相同可为
+
+　　--INTEGER/MONEY/REAL/FLOAT 类型
+
+　　FLOOR(numeric_expression) --返回<=表达式的最小整数返回的数据类型与表达式相同可为
+
+　　--INTEGER/MONEY/REAL/FLOAT 类型
+
+　　ROUND(numeric_expression) --返回以integer_expression 为精度的四舍五入值返回的数据
+
+　　--类型与表达式相同可为INTEGER/MONEY/REAL/FLOAT 类型
+
+　　ABS(numeric_expression) --返回表达式的绝对值返回的数据类型与表达式相同可为
+
+　　--INTEGER/MONEY/REAL/FLOAT 类型
+
+　　SIGN(numeric_expression) --测试参数的正负号返回0 零值1 正数或-1 负数返回的数据类型
+
+　　--与表达式相同可为INTEGER/MONEY/REAL/FLOAT 类型
+
+　　PI() --返回值为π 即3.1415926535897936
+
+　　RAND([integer_expression]) --用任选的[integer_expression]做种子值得出0-1 间的随机浮点数
+
+----字符串函数----
+
+　　ASCII() --函数返回字符表达式最左端字符的ASCII 码值
+
+　　CHAR() --函数用于将ASCII 码转换为字符
+
+　　--如果没有输入0 ~ 255 之间的ASCII 码值CHAR 函数会返回一个NULL 值
+
+　　LOWER() --函数把字符串全部转换为小写
+
+　　UPPER() --函数把字符串全部转换为大写
+
+　　STR() --函数把数值型数据转换为字符型数据
+
+　　LTRIM() --函数把字符串头部的空格去掉
+
+　　RTRIM() --函数把字符串尾部的空格去掉
+
+　　LEFT(),RIGHT(),SUBSTRING() --函数返回部分字符串
+
+　　CHARINDEX(),PATINDEX() --函数返回字符串中某个指定的子串出现的开始位置
+
+　　SOUNDEX() --函数返回一个四位字符码
+
+　　--SOUNDEX函数可用来查找声音相似的字符串但SOUNDEX函数对数字和汉字均只返回0 值
+
+　　DIFFERENCE() --函数返回由SOUNDEX 函数返回的两个字符表达式的值的差异
+
+　　--0 两个SOUNDEX 函数返回值的第一个字符不同
+
+　　--1 两个SOUNDEX 函数返回值的第一个字符相同
+
+　　--2 两个SOUNDEX 函数返回值的第一二个字符相同
+
+　　--3 两个SOUNDEX 函数返回值的第一二三个字符相同
+
+　　--4 两个SOUNDEX 函数返回值完全相同
+
+QUOTENAME() --函数返回被特定字符括起来的字符串　
+
+select quotename('abc', '{') quotename('abc')
+　　运行结果如下
+
+　　----------------------------------{
+
+　　{abc} [abc]*/
+
+　　REPLICATE() --函数返回一个重复character_expression 指定次数的字符串
+
+　　以下是引用片段：　
+
+select replicate('abc', 3) replicate( 'abc', -2)
+　　运行结果如下
+
+　　----------- -----------
+
+　　abcabcabc NULL*/
+
+　　REVERSE() --函数将指定的字符串的字符排列顺序颠倒
+
+　　REPLACE() --函数返回被替换了指定子串的字符串
+
+　　/*select replace('abc123g', '123', 'def')
+
+　　运行结果如下
+
+　　----------- -----------
+
+　　abcdefg*/
+
+　　SPACE() --函数返回一个有指定长度的空白字符串
+
+　　STUFF() --函数用另一子串替换字符串指定位置长度的子串
+
+----数据类型转换函数----
+
+　　CAST() 函数语法如下　
+
+CAST() ( AS [ length ])
+　　CONVERT() 函数语法如下　
+
+CONVERT() ([ length ], [, style])
+　
+select cast(100+99 as char) convert(varchar(12), getdate())
+　　运行结果如下
+
+　　------------------------------ ------------
+
+　　199 Jan 15 2000
+
+　　----日期函数----
+
+　　DAY() --函数返回date_expression 中的日期值
+
+　　MONTH() --函数返回date_expression 中的月份值
+
+　　YEAR() --函数返回date_expression 中的年份值
+
+　　DATEADD( , ,)
+
+　　--函数返回指定日期date 加上指定的额外日期间隔number 产生的新日期
+
+　　DATEDIFF( , ,)
+
+　　--函数返回两个指定日期在datepart 方面的不同之处
+
+　　DATENAME( , ) --函数以字符串的形式返回日期的指定部分
+
+　　DATEPART( , ) --函数以整数值的形式返回日期的指定部分
+
+　　GETDATE() --函数以DATETIME 的缺省格式返回系统当前的日期和时间
+
+　----系统函数----
+
+　　APP_NAME() --函数返回当前执行的应用程序的名称
+
+　　COALESCE() --函数返回众多表达式中第一个非NULL 表达式的值
+
+　　COL_LENGTH(<'table_name'>, <'column_name'>) --函数返回表中指定字段的长度值
+
+　　COL_NAME(, ) --函数返回表中指定字段的名称即列名
+
+　　DATALENGTH() --函数返回数据表达式的数据的实际长度
+
+　　DB_ID(['database_name']) --函数返回数据库的编号
+
+　　DB_NAME(database_id) --函数返回数据库的名称
+
+　　HOST_ID() --函数返回服务器端计算机的名称
+
+　　HOST_NAME() --函数返回服务器端计算机的名称
+
+　　IDENTITY([, seed increment]) [AS column_name])
+
+　　--IDENTITY() 函数只在SELECT INTO 语句中使用用于插入一个identity column列到新表中　
+
+/*select identity(int, 1, 1) as column_name 
+　　into newtable 
+　　from oldtable*/
+　　ISDATE() --函数判断所给定的表达式是否为合理日期
+
+　　ISNULL(, ) --函数将表达式中的NULL 值用指定值替换
+
+　　ISNUMERIC() --函数判断所给定的表达式是否为合理的数值
+
+　　NEWID() --函数返回一个UNIQUEIDENTIFIER 类型的数值
+
+　　NULLIF(, )
+
+　　--NULLIF 函数在expression1 与expression2 相等时返回NULL 值若不相等时则返回expression1 的值
+
+开源性能监控工具Ganglia
+JBoss Drools开源规则引擎
+MongoDB 开源NoSql
+Lucene 开源搜索引擎
+ofbiz
+solr
+
+Private Sub underLine_Click()  
+  
+    '数据库中的列名  
+    Dim dbColumnStr As String  
+         
+    '开始的位置，由横竖坐标确认  
+    Dim index As Integer  
+    Dim rangeStr  
+    '行（横）  
+    index = 6  
+         
+    '列（竖）  
+    rangeStr = "B"  
+         
+    '生成单元个位置，这里没有自动装箱，所以要用一个函数把数字转换一下  
+    rangeStr = rangeStr + CStr(index)  
+         
+    '单元个位置生成正确与否，测试用  
+    'MsgBox rangeStr  
+         
+    '判断不为空，注意这里要用""空串，而不能使用null，null时永远false  
+    Do While Sheet1.Range(rangeStr).Value <> ""  
+             
+        '进入循环测试用  
+        'MsgBox rangeStr  
+             
+        'Excel中的数据（数据库中的列名）  
+        dbColumnStr = Sheet1.Range(rangeStr).Value  
+         
+        '调用对数据库中列明处理的函数  
+         Call underLineEscape_upcase(dbColumnStr)  
+         
+        '处理之后位置，稍微往右移动一下  
+        rangeStr = "C"  
+        '通过横竖两个坐标，组合出生成的位置  
+        rangeStr = rangeStr + CStr(index)  
+        '输出处理之后的数据  
+        Sheet1.Range(rangeStr).Value = dbColumnStr  
+             
+        '读取下一个数据  
+        index = index + 1  
+        '源数据的位置还要变回来  
+        rangeStr = "B"  
+        '通过横竖两个坐标，组合出源数据的位置  
+        rangeStr = rangeStr + CStr(index)  
+             
+    Loop  
+         
+    MsgBox "end"  
+
+End Sub  
+    
+'发现下划线，去掉，得到以下划线分割的字符串 （不知道是否有java中split的功能）  
+Sub underLineEscape_upcase(ByRef dbColumnStr As String)  
+
+    '存放分割后组合的字符串  
+    Dim str As String  
+         
+    '存放每一个分割的字符串  
+    Dim splitStr As String  
+         
+    '初始化一下  
+    str = ""  
+         
+    '在VBA中，字符串索引从1开始  
+    Dim index  
+         
+    '如果返回的不是0，就表明查到数据了，则继续循环  
+    Dim flag  
+         
+    '初始化开始位置  
+    index = 1  
+    '初始化flag  
+    flag = 1  
+         
+    '获取字符串长度  
+    length = Len(dbColumnStr)  
+         
+    '获取第一个"_"的位置，不在循环里面  
+    index = InStr(index, dbColumnStr, "_")  
+      
+    '20100206 修改  （原因1：当不含有"_"的情况），直接在循环最后一步，会把受str的值付给dbColumnStr，而str的初值是""  
+    If index = 0 Then str = dbColumnStr  
+         
+     '20100206 修改 （原因1：当不含有"_"的情况） 添加条件 And index <> 0 当不含下划线时，便不会进入循环，之前忘记以对flag的初值设为1，不能再用flag判断  
+    '当没有找到 flag=0，或 超过长度时，退出循环  
+    Do While (flag <> 0 And index <= length And index <> 0)  
+         
+        '获取字符串中"_"的位置  
+        index = InStr(index, dbColumnStr, "_")  
+             
+        '如果最后一次没有查到那么index=0，而之前还查到了（一次也没有的情况不会进入循环）,  
+        '这时flag中，保存的还是是上一个"_"的位置，但是由于下面的判断flag不等于一时会加一  
+        '所以，这里还要加一，否则最后一个串会少一个长度  
+        If index = 0 Then index = length + 1  
+             
+        '如果是从找到"_"的位置开始需要加1，因为flag存的是"_"的位置  
+        If flag <> 1 Then flag = flag + 1  
+             
+        '获取字符串，以"_"分割  
+        splitStr = Mid(dbColumnStr, flag, index - flag)  
+             
+             
+         '20100206 修改 （原因2：开始的第一个字母大写了），增加判断条件，当第一次时，不调用字母转换函数（不将取得串的第一个字母变为大写）  
+         '20100206 修改 （原因2：开始的第一个字母大写了），因为flag代表开始的位置，flag=1表明是第一个  
+         '20100206 修改 （原因2：开始的第一个字母大写了），注意这里Call好像不能换行（中间再隔一行干注释），否则编译出错，不知道为什么？反正现在好用了！  
+         '把第一个字母变成大写  
+         If flag <> 1 Then Call firstCharToUpcase(splitStr)  
+             
+         
+        '测试时使用  
+        'MsgBox splitStr  
+             
+        '把每一个分割后并且转换为大写的字符串组合起来  
+        str = str + splitStr  
+             
+        '因为有0的判断，所以不能加1。同时在上面还有使用，这样就不用再定义一个临时变量存index了  
+        flag = index  
+             
+        '改变下一个索引开始的位置，也就是"_"之后那个字母的索引  
+        index = index + 1  
+             
+   Loop  
+         
+    '分割后的字符串，因为是应用传值，这里就相当于return  
+    dbColumnStr = str  
+          
+End Sub  
+   '把字符串中的第一个字母变成大写  
+   Sub firstCharToUpcase(ByRef str As String)  
+   
+        Dim tempStr  
+             
+        Dim length  
+             
+        '获取长度  
+        length = Len(str)  
+             
+        '为了保留小写部分，使用后两位  
+        tempStr = str  
+             
+        '使用转换为大写的第一位  
+        str = StrConv(str, vbUpperCase)  
+             
+        '把第一位和后两位拼接起来  
+        str = Mid(str, 1, 1) + Mid(tempStr, 2, length)    
+   End Su
+
+sub_str变成subStr:       =MID(SUBSTITUTE(A1,"_",""),1,1)&MID(SUBSTITUTE(PROPER(A1),"_",""),2,50)
+select site from systables where tabname='GL_COLLATE'
+
+ DB_LOCALE=en_us.819;CLIENT_LOCALE=en_us.57372;NEWCODESET=GBK,8859-1,819
+中文字符集介绍：
+     GB2313包括6763个汉字
+     GBK收录了20902个汉字
+     GB18030收录了27484个汉字
+注：从ASCII、GB2312、 GBK到GB18030，这些编码方法是向下兼容的，即同一个字符在这些方案中总是有相同的编码，后面的标准支持更多的字符。
+
+总结：
+GB2312＝ASCII＋常用汉字＋符号
+GBK＝GB2312＋不常用字（含BIG5繁体汉字）＋图形符号
+GB18030＝GBK＋Ext-A＋图形符号
+Unicode＝GB18030＋Ext-B＋……（如未发布的Ext-C及其它国家文字）
+注意：Unicode的汉字编码与前三者不一样，UTF-8是Unicode的实现方式之一。
+
+AIX系统中：
+AIX的中文汉字库中，zh_CN 中有6763个汉字，而ZH_CN中有20902个汉字。如果用户要用到一些比较偏僻的汉字，建议用户安装中文环境时选择ZH_CN。
+
+GBK的意思是 Guo (national) Biao (Standard) Kuo (Extension).
+GB18030 将国家标准定义进行了扩展,包含 20902 个汉字, 它定义了所有 DBCS 字符以及中国大陆及台湾地区使用的符号
+注：AIX中各字符集的区别在于zh_CN的大小写。
+常用命令：
+查看已经安装的字符集
+     locale -a
+     注："C"是系统默认的locale，"POSIX"是"C"的别名。所以当我们新安装完一个系统时，默认的locale就是C或POSIX
+查看当前系统使用的字符集
+     env | grep LANG 
+修改整个系统的字符集
+     vi /etc/environment --> LANG=Zh_CN
+修改单个用户的字符集
+     vi .profile --> EXPORT LANG=xxx
+如：
+LANG=Zh_CN.GB18030  
+LC_COLLATE="Zh_CN.GB18030"  
+LC_CTYPE="Zh_CN.GB18030"  
+LC_MONETARY="Zh_CN.GB18030"  
+LC_NUMERIC="Zh_CN.GB18030"  
+LC_TIME="Zh_CN.GB18030"  
+LC_MESSAGES="Zh_CN.GB18030"  
+LC_ALL=  
+export LANG  
+
+如果发现通过locale命令查出来的字符为
+LANG=Zh_CN.GB18030  
+LC_COLLATE="C"  
+LC_CTYPE="C"  
+LC_MONETARY="C"  
+LC_NUMERIC="C"  
+LC_TIME="C"  
+LC_MESSAGES="C"  
+LC_ALL=
+那么需要查看.profile文件中是否有^M,使用二进制方式传入的会出现这种分隔符，导致解析环境变量异常，请直接使用vi来编辑
+
+
+
+
+启动数据库： 启动db2服务： db2start 激活数据库实例：  db2 activate database <db_name>
+查看激活状态的数据库：db2 list active databases
+9
+关闭数据库： 失效数据库实例：db2 deactivate database <db_name>  关闭数据库服务： db2stop
+
+查看数据库： db2 list db directory
+
+查看数据库应用： db2 list applications 查看数据库应用和进程号： db2 list applications show detail 查看数据库表空间： db2pd -db <db_name> -tablespace
+
+查看数据库配置：db2 get db cfg for <db_name> 连接数据库：db2 connect to <db_name> db2 connect to <db_name> user[user_name] 	using [password] 断开数据库连接：db2 connect reset/db2 terminate 创建数据库：db2 create db <db_name> 删除数据库：db2 drop database <db_name> （如果不能删除，尝试断开激活的连接或者重启db2）
+
+列出系统表：db2 list tables for system 列出所有用户表：db2 list tables 列出所有表：db2 list tables for all 列出特定用户表：db2 list tables for schema [user]
+
+复制一张表：db2 create table t1 like t2 显示表结构：db2 describe table tablename 查询表：db2 "select * from table tablename where ..." 执行SQL脚本：db2 -tvf scripts.sql
+
+查看错误代码信息：db2 ? 10054 停止激活的连接：db2 force application all;\db2 force application all;\db2 force application all;\db2stop 查看死锁： db2 get snapshot for locks on <db_name> db2 "select agent_id,tabname,lock_mode from table(snap_get_lock('<db_name>')) as aa" 杀掉进程： db2 force application(NUM) 监控DB2消耗多的SQL语句： eg:（DB_NAME=CMSDB） db2top -d CMSDB -----查看消耗资源 按照提示按 l，出现Application Handle，找到资源消耗大的Application Handle（stat） 记下app handle。 db2pd -d CMSDB -dyn -application > /tmp/db2pd1.txt ----到处会话语句，准备进行调优
+
+设置连接方式（重启才会生效）： db2set DB2COMM=tcpip db2set DB2COMM=
+
+创建db2 实例和创建库的方法大致分为两类！一类是图形界面db2setup 创建一种是CLI创建！此处只描述一下CLI方式至于图形界面请大家搜索一下吧！
+db2 创建实例 创建数据库
+1.创建实例用户
+mkdir /db2/db2test 创建实例用户目录
+smitty user
+选择Add a User
+* User NAME                                          [db2test]                                                             
+User ID                                                   []                                                                    
+ADMINISTRATIVE USER?                       false                                                               
+Primary GROUP                                     [db2iadm1]                                                           
+Group SET                                           [staff]                                                              
+ADMINISTRATIVE GROUPS                   []                                                                   
+ROLES                                                         []                                                                   
+Another user can SU TO USER?            true                                                                
+SU GROUPS                                          [ALL]                                                                
+HOME directory                                     [/db2/db2test]
+Initial PROGRAM                                    [/usr/bin/ksh]
+
+2.创建实例 DB2_install=/usr/opt/db2_08_01/instance
+./db2icrt -u db2test db2test
+
+3.创建数据库
+su - db2test
+db2start     #此处不执行启动实例将报:SQL1032N No start database manager command was issued. SQLSTATE=57019
+db2 create db db2test
+
+4.删除数据库
+db2 drop db db2test
+db2stop
+
+5.删除实例
+cd DB2_install
+./db2idrop -f db2test # -f参数一定要添加否则删除完了会报错！
+
+6.删除用户
+smitty user
+选择Remove a User
+* User NAME                                          [db2test]                                                           +
+Remove AUTHENTICATION information?                  yes      
+删除用户目录
+rm -rf db2test
+
+
+
+#!/bin/sh   
+  
+SERVER=/home/java/server   
+cd $SERVER   
+  
+case "$1" in   
+  
+  start)   
+    nohup java -Xmx128m -jar server.jar > $SERVER/server.log 2>&1 &   
+    echo $! > $SERVER/server.pid   
+    ;;   
+  
+  stop)   
+    kill `cat $SERVER/server.pid`   
+    rm -rf $SERVER/server.pid   
+    ;;   
+  
+  restart)   
+    $0 stop   
+    sleep 1   
+    $0 start   
+    ;;   
+  
+  *)   
+    echo "Usage: run.sh {start|stop|restart}"  
+    ;;   
+  
+esac   
+  
+exit 0  
+shell学习2
+
+ 
+
+ 
+
+#声明执行该脚本的程序使用sh或bash
+#! /bin/sh
+
+#利用pwd命令获取当前工程目录，实际获取到的是该shell脚本的目录。再利用sed命令将/bin替换为空
+Project_HOME=$(echo `pwd` | sed 's/\/bin//')
+
+#存放进程文件
+ProjectPIDFILE=$Project_HOME/project.pid
+
+#case语句，对应结束为esac 特殊变量$1，该变量包含有传递给该脚本的第一个参数值
+#一般运行时，都是./**** start or stop ,所以参数值如下所示
+case $1 in
+
+#输入参数为start时
+start)
+
+#输出starting project ... ，echo可以看成print to screen
+echo "Starting project ... "
+
+#设置变量Heap的大小，表示JVM虚拟机堆内存的大小，XMS初始化内存，XMX最大内存，一般两个相等且不超过2G。
+HEAP_MEMORY=512m
+
+#永久域内存，永久区域用来存放Java类及其他虚拟机自己的静态数据，
+#也包含初始化和最大值，一般设置相等，减少达到初始化值时去申请内存的开销
+PERM_MEMORY=64m
+
+#JMX连接端口
+JMX_PORT=7001
+
+#jvm启动部分参数
+JAVA_OPTS="-server -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider -XX:+HeapDumpOnOutO
+fMemoryError -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.j
+mxremote.ssl=false"
+
+#shift 命令，shift 命令执行前变量 $1 的值在 shift 命令执行后就不可用，位置变量的指向向后移1次
+shift
+
+#($*)所有参数赋给ARGS，当然$1除外
+ARGS=($*)
+
+#if循环加case语句，作用就是把shell的参数值赋给之前定义的变量，比如./*.sh start -JmxPort 8888
+
+#则定义的JMX_PORT=7001即变为8888
+for ((i=0; i<${#ARGS[@]}; i++)); do
+
+case "${ARGS[$i]}" in
+-D*) JAVA_OPTS="${JAVA_OPTS} ${ARGS[$i]}" ;;
+-Heap*) HEAP_MEMORY="${ARGS[$i+1]}" ;;
+-Perm*) PERM_MEMORY="${ARGS[$i+1]}" ;;
+-JmxPort*) JMX_PORT="${ARGS[$i+1]}" ;;
+esac
+done
+
+#完整的jvm启动参数，将之前定义的变量组合。
+JAVA_OPTS="${JAVA_OPTS} -Xms${HEAP_MEMORY} -Xmx${HEAP_MEMORY} -XX:PermSize=${PERM_MEMORY} -X X:MaxPermSize=${PERM_MEMORY} -Dcom.sun.management.jmxremote.port=${JMX_PORT} -Duser.dir=${Projec t_HOME}"
+
+#输出参数
+echo "start jvm args ${JAVA_OPTS}"
+
+#此条语句最为重要，使用nohup命令启动jar包，nohup命令就是让程序永远在后台运行
+nohup java $JAVA_OPTS -jar ${Project_HOME}/bin/project.jar &
+
+# $!为系统变量，表示上一个子进程的进程号。 shell遇到”>”操作符，会判断右边文件是否存在，如果存在就先删除，并且创建新文件。
+#不存在直接创建。无论左边命令执行是否成功。右边文件都会变为空。
+#重定向不是很理解，个人认为就是将进程号保存在 project.pid文件中
+echo $! > $ProjectPIDFILE
+
+#打印系统启动成功
+echo STARTED
+
+#一直不知道两个连着的分号是啥意思，我想应该就是break的意思
+;;
+
+#如果$1为stop时
+stop)
+echo "Stopping project ... "
+
+#首先判断project.pid是否存在，若不存在返回没有找到文件。-f 判断后面参数是否是一个文件，若是返回1
+if [ ! -f $ProjectPIDFILE ]
+then
+echo "error: count not find file $ProjectPIDFILE"
+exit 1
+else
+
+#杀掉系统进程 $(cat $ProjectPIDFILE)
+kill -9 $(cat $ProjectPIDFILE)
+rm $ProjectPIDFILE
+echo STOPPED
+fi
+;;
+
+#如果$1不是start、stop等任意字符时，
+*)
+echo "Exec ... "
+
+#调用ant来执行这个命令
+ant $*
+;;
+
+#结束case语句
+esac
+
+exit 0
