@@ -1,0 +1,1902 @@
+SELECT TABNAME FROM SYSCAT.TABLES WHERE TBSPACE='表空间名';
+
+db2p搜索d -d 数据库名 -tablespace 在现实结果中如下就是 AS是automaitc storage自动存储的缩写，AR是autoresize的缩写 AS是yes证明表空间是自动存储的 AR是yes证明表空间是自动扩展的
+statistics
+AS AR
+YES NO
+
+系统管理的空间（SMS）和数据库管理的空间（DMS）是DB2数据库中两种类型的基本表空间。
+与 SMS 表空间相关联的容器是文件系统目录，而这些目录中的文件会随着表空间中对象的增长而增长。文件会增加至达到其中一个容器上的文件系统限制或达到数据库的表空间大小限制。
+DMS 表空间由文件容器或原始设备容器组成，它们的大小是在将容器指定给表空间时设置的。当容器中的所有空间都已被使用时，则认为表空间已满。但是，与 SMS 不同，您可以使用 ALTER TABLESPACE 语句来添加或扩展容器，从而允许将更多的存储器空间提供给表空间。DMS 表空间还具有称为“自动调整大小”的功能。当可以自动调整大小的 DMS 表空间中的空间被消耗时，DB2 数据库系统可能回扩展一个或多个文件容器。SMS 表空间具有类似于自动增长的功能但术语“自动调整大小”专门用于 DMS。
+启用和禁用自动调整大小（AUTORESIZE）
+缺省情况下，不会对 DMS 表空间启用自动调整大小功能。下列语句创建不启用自动调整大小功能的 DMS 表空间：
+CREATE TABLESPACE DMS1 MANAGED BY DATABASE
+     USING (FILE '/db2files/DMS1' 10 M)要启用自动调整大小功能，将 AUTORESIZE YES 子句指定为 CREATE TABLESPACE 语句的一部分：
+CREATE TABLESPACE DMS1 MANAGED BY DATABASE
+     USING (FILE '/db2files/DMS1' 10 M) AUTORESIZE YES在已创建 DMS 表空间之后，还可以通过在 ALTER TABLESPACE 语句上使用 AUTORESIZE 子句来启用或禁用自动调整大小功能：
+ALTER TABLESPACE DMS1 AUTORESIZE YES
+   ALTER TABLESPACE DMS1 AUTORESIZE NO有两个其他属性（MAXSIZE 和 INCREASESIZE）与自动调整大小的表空间相关联。
+
+
+要看你的表空间是系统管理还是数据库管理，系统管理的是自动增长的，数据库管理的表空间是要指定大小的。
+系统管理：SMS
+数据库管理：DMS
+
+reorg 前提删除了大量数据，一般情况是能释放出空间出来的，但也有可能空间不但没释放反而还是增大空间，用db2dart看看高水位吧
+
+reorg table schema.tablename;
+runstats on table schema.tablename;
+
+
+查了一下资料，可以通过修改database_memory系统参数来设置数据库内存的使用。默认情况下database_memory的设置是AUTOMATIC，这里可以通过下面的命令来修改参数，修改完后要重新启动db2
+
+
+tar -czvf压
+tar -zxvf 解
+[plain] view plain copy 在CODE上查看代码片派生到我的代码片
+$ db2 update db cfg for <db> using database_memory 8000000
+$ db2stop force
+$ db2start
+
+# Linux 下 取进程占用 cpu 最高的前10个进程
+ps aux|head -1;ps aux|grep -v PID|sort -rn -k +3|head
+
+
+# linux 下 取进程占用内存(MEM)最高的前10个进程
+
+ps aux|head -1;ps aux|grep -v PID|sort -rn -k +4|head
+使用命令看看你的数据库用了多少内存：
+$db2 get dbm cfg |grep -i memory
+
+# db2mtrk -i -d -v
+Tracking Memory on: 2014/06/22 at 21:50:19
+
+Memory for instance
+
+ Other Memory is of size 63111168 bytes
+ FCMBP Heap is of size 851968 bytes
+ Database Monitor Heap is of size 983040 bytes
+ Total: 64946176 bytes
+
+Memory for database: PA913
+
+ Backup/Restore/Util Heap is of size 65536 bytes
+ Package Cache is of size 262144 bytes
+ Other Memory is of size 196608 bytes
+ Catalog Cache Heap is of size 262144 bytes
+ Buffer Pool Heap (1) is of size 24465047552 bytes
+ Buffer Pool Heap (System 32k buffer pool) is of size 1835008 bytes
+ Buffer Pool Heap (System 16k buffer pool) is of size 1572864 bytes
+ Buffer Pool Heap (System 8k buffer pool) is of size 1441792 bytes
+ Buffer Pool Heap (System 4k buffer pool) is of size 1376256 bytes
+ Shared Sort Heap is of size 0 bytes
+ Lock Manager Heap is of size 3881172992 bytes
+ Database Heap is of size 94830592 bytes
+ Application Heap (47) is of size 131072 bytes
+ Application Heap (45) is of size 65536 bytes
+ Application Heap (44) is of size 65536 bytes
+ Application Heap (43) is of size 65536 bytes
+ Application Heap (42) is of size 65536 bytes
+ Application Heap (41) is of size 65536 bytes
+ Application Heap (40) is of size 65536 bytes
+ Application Heap (39) is of size 65536 bytes
+ Application Heap (38) is of size 65536 bytes
+ Application Heap (37) is of size 65536 bytes
+ Application Heap (36) is of size 65536 bytes
+ Application Heap (35) is of size 65536 bytes
+ Application Heap (34) is of size 65536 bytes
+ Application Heap (33) is of size 65536 bytes
+ Application Heap (32) is of size 65536 bytes
+ Application Heap (31) is of size 65536 bytes
+ Application Heap (30) is of size 65536 bytes
+ Application Heap (29) is of size 65536 bytes
+ Application Heap (28) is of size 65536 bytes
+ Application Heap (27) is of size 65536 bytes
+ Application Heap (26) is of size 65536 bytes
+ Application Heap (25) is of size 65536 bytes
+ Application Heap (24) is of size 65536 bytes
+ Application Heap (23) is of size 65536 bytes
+ Application Heap (22) is of size 65536 bytes
+ Application Heap (21) is of size 65536 bytes
+ Application Heap (20) is of size 65536 bytes
+ Application Heap (19) is of size 65536 bytes
+ Application Heap (18) is of size 65536 bytes
+ Application Heap (17) is of size 65536 bytes
+ Application Heap (16) is of size 65536 bytes
+ Application Heap (15) is of size 65536 bytes
+ Application Heap (14) is of size 65536 bytes
+ Application Heap (13) is of size 65536 bytes
+ Application Heap (12) is of size 65536 bytes
+ Application Heap (11) is of size 196608 bytes
+ Application Heap (10) is of size 65536 bytes
+ Application Heap (9) is of size 65536 bytes
+ Application Heap (8) is of size 65536 bytes
+ Application Heap (7) is of size 131072 bytes
+ Applications Shared Heap is of size 393216 bytes
+ Total: 28451340288 bytes
+
+其中重点是“Memory for database: PA913”下的“Buffer Pool Heap (1) is of size 24465047552 bytes”，用了近25G的内存，由于我确定我的数据库中的数据量不是很大，所以减少数据库内存就是我的首选了。
+
+查了一下资料，可以通过修改database_memory系统参数来设置数据库内存的使用。默认情况下database_memory的设置是AUTOMATIC，这里可以通过下面的命令来修改参数，修改完后要重新启动db2
+
+$ db2 update db cfg for <db> using database_memory 8000000
+$ db2stop force
+$ db2start
+
+数据库重启后，先用客户端连接一下数据库，然后再使用“db2mtrk -i -d -v”查看内存使用情况，就发现内存就会有明显的下降。用top查看结果也类似。
+
+在真实的DB2使用情况下，修改这个值是需要慎重的，可以参考下面列出的参考资料。
+
+
+select basi.ID,basi.RULE_ID,basi.ALERT_DATE,basi.CUSTOM_ID,basi.OPER_TIME,rule.DISPLAY_NAME,1 as operStatus
+from ALERT_BASICINFO basi join XT_RULE_MAIN rule on basi.RULE_ID = rule.id and send_type='1'
+where basi.alert_date >='2016-10-27' and basi.alert_date <='2016-10-27'
+and   exists ( select * from ALERT_GL_BASIC_DETAIL detail left join ALERT_FLOW_INFO flow on detail.DETAIL_ID = flow.DETAIL_ID
+where detail.BASICINFO_ID = basi.id and flow.PERUSE_STATE = 0 );
+
+select * from ALERT_FLOW_INFO flow where exists(select * from ALERT_GL_BASIC_DETAIL detail join ALERT_BASICINFO basi on detail.BASICINFO_ID = basi.id
+where detail.DETAIL_ID = flow.DETAIL_ID and basi.id='20071102009800124306320161026165435');
+1.1   检查管理相关服务
+
+RHCS的包括4个服务，按照启动顺序依次是：ccsd、cman、fenced、rgmanager。可以使用service命令启停这些服务或查看状态。（service service_name start/stop/status）
+集群中有两个服务，数据库和FTP。数据库服务包括VIP、 文件系统、 db2run脚本三个资源。这些可以查看集群配置文件 /etc/cluster/cluster.conf。
+在图形界面下，使用 system-config-cluster 启动集群管理工具 。在命令行下，使用clustat命令可以查看集群状态；使用clusvcadm命令可以启动、切换服务。
+
+list command options
+db2 update command options using c off
+
+向表中增加一个 VARCHAR 列：
+ALTER TABLE distributors ADD COLUMN address VARCHAR(30);
+
+用ps命令查看是否有db2sysc后台进程
+
+ ＃ps -ef | db2sysc
+
+?  检查数据库服务器是否可以通过网络访问
+相关命令：ping 10.7.63.202
+                  telnet 10.7.63.202 60000
+                  db2 connect to ddn user db2inst （使用db2inst用户）
+
+
+
+?  平台服务器重启后需要启动的服务汇总如下：
+web1、2服务器:
+
+service tomcat start  启动tomcat服务
+
+service turbomq start  启动turbomq服务
+
+/usr/local/GETGPSMaile/run.sh  启动获取里程数服务
+
+可用ps -ef  | grep java进行查看是否彻底关闭
+
+lvs服务器无需单独启服务，随开机即可启动相关服务
+
+?  手动挂载相关资源操作
+如果RHCS集群出现异常，无法启动或切换数据库服务，可以通过手工方式挂载相关资源。但此时这些资源已经脱离集群软件的管理，集群状态恢复正常后，应同样通过手工方式卸载这些资源，再使用集群管理工具启动服务。
+
+ littleNoPwdContract
+
+(1) 卸载失败节点上的资源
+
+
+
+登陆出现故障的服务器，检查集群资源状态。
+
+
+
+检查数据库实例是否已经停止（ps -ef | grep db2sysc），如未停止以db2inst用户执行db2stop命令；
+
+检查文件系统是否已经卸载（df -h），如未卸载以root用户执行 umount 命令；
+
+检查VIP是否已经解除绑定（ifconfig），如未解绑以root用户执行 ifconfig eth0:1 down 命令。
+
+
+
+如果部分资源无法卸载，考虑在适当时候重启故障服务器。
+
+
+
+(2) 在可用节点上挂载资源
+
+
+
+登陆状态正常的服务器，以root用户执行如下命令：
+
+
+
+绑定VIP：ifconfig eth0:1 10.7.63.202 netmask 255.255.255.128 up
+
+挂载文件系统：mount /dev/sdb1 /mnt/data
+
+启动数据库：su - db2inst
+
+            db2start
+
+
+
+(3) 检查数据库状态
+
+
+
+在WEB服务器上以db2inst用户执行如下命令：
+
+
+
+连接数据库：db2 connect to ddn user db2inst 命令
+
+查询表中的数据：db2 “select * from mbl_device fetch first 1 rows only”
+
+
+1.2   检查DB2实例是否已经启动
+
+用ps命令查看是否有db2sysc后台进程
+
+＃ps -ef | db2sysc
+
+
+..
+也可以以DB2实例所有者登录，通过发出db2start命令来确保启动了实例（如果实例已经启动，则会告知SQL1026N  数据库管理器已激活；否则，将把实例启动起来）
+
+
+
+1.3   查看表空间状态是否正常
+
+以db2实例所有者登录
+#db2 conn to ddn
+#db2 list tablespaces show detail        //在单分区上查看表空间的状态,正常返回0x0000
+# db2_all list tablespaces show detail    //在所有分区上查看表空间的状态
+
+可以使用LIST TABLESPACES 命令确定连接数据库中表空间的当前状态，可以使用SHOW DETAIL选项查看表空间的详细信息。比如，我们连上SAMPLE数据库，执行list tablespaces show detail ，可以看到状态返回值是0x0000，此时，使用db2tbst可以查看状态编号对于的状态含义，具体语法如下：
+
+db2tbst   可以查看编号所代表的状态
+
+db2tbst 命令接收十六进制的状态值，并返回相应的表空间状态。例如，命令 db2tbst 0x0008 返回 State = Load Pending 。而该十六进制的状态值反过来又是 LIST TABLESPACES 命令输出的组成部分。表空间的外部可见状态是由单个状态值的十六进制总和构成的。例如，如果表空间的状态是 Backup Pending和 Load in Progress，那么所返回的十六进制值就是 0x20020（0x00020 + 0x20000）
+
+1.4   与表有关操作
+
+?  显示与MBL_ME匹配的所有表：
+#db2 list tables | grep MBL_ME
+?  查看MBL_MESSAGE表结构：
+#db2 discribe table MBL_MESSAGE
+?  显示表中所有数据：
+#db2 "select * from MBL_MESSAGE"
+?  显示MBL_MESSAGELOG表中前n行数据内容：
+#db2 "select * from MBL_MESSAGELOG fetch first n rows only"
+?  导出表和删除表操作：
+例如：将mbl_messagelog_1127表中的数据导出为.del格式的文件
+      db2 export to mbl_messagelog_1127.del of del select * from mbl_messagelog_1127"
+      删除mbl_messagelog_1127表及包含的数据
+      db2 drop table mbl_messagelog_1127
+1.5   查看磁盘空间
+
+#df -h
+
+1.6   检查配置文件信息
+
+su – db2inst
+db2 connect to ddn
+
+显示DB2配置文件中与数据库ddn有关所有信息：
+
+【db2inst@db1 ~】db2 get db cfg for ddn show detail|more
+
+查看DB2配置文件，过滤出log的配置信息：
+
+【db2inst@db1 ~】db2 get db cfg for ddn show detail | grep -i log
+
+1.7   数据库备份与恢复操作
+
+1.备份方式
+
+集团业务接入平台业务系统已经上线运行两年多，数据量12GB左右，数据库容器总大小15GB，数据库使用档案日志记录，可以进行在线备份。
+目前采用在线全量备份的方式来备份整个数据库，在发生灾难性故障时，使用备份文件和日志文件可以进行时间点恢复，将数据库恢复到故障发生的前一刻。
+
+2.备份策略
+
+目前，数据库每天凌晨两点进行一次全量备份，备份文件存放在本地硬盘，保留最近两天的备份。备份完成后，将备份文件传送到磁带机，保留最近50天的备份。这样既保证数据库备份文件异地存放，又实现了充分冗余。
+
+3.备份的实现
+
+数据库的定期自动备份是通过操作系统cron程序定期执行备份脚本db2mbk-master来实现的。该脚本包括如下功能：
+
+(1) 在线全备ddn数据库。
+(2) 将备份文件tar到磁带中。
+(3) 删除两天以上的旧备份文件。
+(4) 将每项操作的时间、结果记录到备份日志中。
+(5) 自动清理备份日志。
+
+4.备份的检查
+
+检查数据库的备份情况需要在服务器db1.db2.com上进行，包括以下内容：
+
+(1) 检查备份文件是否生成
+
+备份文件存放在 /home/db2inst/db2backup/backup 目录下，文件名称类似DDN.0.db2inst.NODE0000.CATN0000.20091109164735.001，正常情况下该目录下应该有最近两天生成的两个备份文件。
+
+(2) 检查备份过程是否正常
+
+备份日志存放在 /home/db2inst/db2exec/log 目录下，日志文件名为backup.log。每天备份脚本执行过程中会在备份日志中记录备份数据库、tar备份文件到磁带、删除旧备份文件等操作的起止时间与结果，可以通过这些记录确定备份是否正常进行。
+
+(3) 检查本地磁盘空间
+
+备份目录位于本地磁盘的根分区，假设备份文件的大小为n GB，那么该分区的剩余空间最好大于2n GB，最少也要大于n+2 GB。
+
+(4) 检查备份文件是否tar到磁带
+通过 tar -tvf /dev/st0 命令查看磁带的内容，确认显示结果中有最新的备份文件。当磁带中的备份文件较多时，这个操作可能花费很长时间。
+检查备份配置文件情况：
+【db2inst@db1 ~】$ crontab -l
+备份文件存放目录：
+【db2inst@db1 ~】$ cd db2exec/bin
+检查备用数据库服务器数据库运行是否正常：
+ 备用服务器：db2 connnect to db2
+             Db2 list tables
+             Db2 “select count(*) from mb1_device”
+用集群管理工具将数据库服务切换到备用DB服务器：
+Clusvcadm –r <服务名>  -m <成员名>
+进行数据库的RESTORE恢复（如果出现SQL0322N错误，则修改DB2CODEPAGE参数，然后重新执行restore命令）：
+主服务器db1:  db2 restore db ddn from /home/db2inst/ddnback taken at <备份文件时间戳> to /mnt/data     例如：db2set db2codepage=819
+进行数据库的ROLLFORWARD恢复：
+主服务器db1:    db2  rollforward db ddn to end of logs and stop
+测试数据库状态：
+主服务器： db2 connect to db2
+           然后 db2 list tables
+           然后 db2”select count(*) from mb1_device”
+           然后 db2set db2codepage=1386
+1.8   检查归档日志相关操作
+
+请确保活动日志目录下没有的日志文件都已经正确归档到了带机上(查看TSM或第三方存储管理软件)。
+
+
+
+归档日志配置文件参数及说明：
+
+【db2inst@db1 SQLOGDIR】
+
+su – db2inst
+
+db2 connect to ddn
+
+db2 get db cfg for ddn show detail | grep –i log
+
+LOGRETAIN             RECOVERY
+
+USEREXIT               ON
+
+LOGARCHMETH1    RECOVERY
+
+如果userexit为ON，但是LOGARCHMETH1相同，查看目录和链接 /home/db2inst/db2exec/bindb2mbk-master
+
+
+
+如果LOGARCHMETH1为DISK:/archlog，则DB2会自动将归档日志归档到目录/archlog下
+
+db2 “update db cfg for ddn using logarchmeth1 DISK:/archlog”
+
+
+
+如果需要更改参数，执行更新命令：
+
+db2 update db cfg for ddn using 参数名     参数值
+
+如果更改参数生效，需要重新启动DB2连接
+
+db2 force application all
+
+db2 list applications
+
+
+
+如果应用无法停止，重新启动DB2
+
+db2 force application all
+
+db2stop
+
+db2start
+
+1.9   扩容表空间
+
+DB2现有表空间扩容方法
+db2 list tablespaces show detail
+
+1）直接添加一个容器的例子：
+db2 " ALTER TABLESPACE PAYROLL ADD (DEVICE '/dev/rhdisk9' 10000) "
+加容器之后DB2会有一个自动balance的过程,可能会持续几个小时!!!
+2）改变现有容器的大小(该方法不会触发balance,但如果表空间建立在裸设备上,则要扩冲裸设备空间):
+db2 " ALTER TABLESPACE TS1 RESIZE (FILE '/conts/cont0' 2000, DEVICE '/dev/rcont1' 2000, FILE 'cont2' 2000) "
+注意这种方式就是将原有的相应容器都改成大小是2000页
+db2 "ALTER TABLESPACE TS1 RESIZE (ALL 2000)"
+这种方式就是把表空间中所有的容器大小都改成2000页
+db2 " ALTER TABLESPACE TS1 EXTEND (FILE '/conts/cont0' 1000, DEVICE '/dev/rcont1' 1000, FILE 'cont2' 1000) "
+这种方式就是将相应的容器都扩大1000页，也就是增加1000页。
+db2 " ALTER TABLESPACE DATA_TS EXTEND (ALL 1000)"
+这种方式就是将所有的容器都增加1000页。
+db2 " ALTER TABLESPACE USERSPACE1 EXTEND (ALL 100)"
+DB2日常维护月操作
+1、        日志清理相关操作
+
+检查第一活动日志：
+[db2inst@db1 SQLOGDIR]$db2 get db cfg | grep “First active”
+    清理日志文件时只能清理第一活动日志之前的日志；
+请至少每月查看一次db2diag.log文件，看其中是否有异常。
+
+相关日志清理操作
+
+无论采用哪种措施，都要先确定目前的活动日志。使用db2inst用户执行以下操作：
+
+(1) 连接数据库：db2 connect to ddn
+(2) 查看日志文件目录：db2 get db cfg | grep "Path"
+(3) 查看第一活动日志：db2 get db cfg | grep "First active"
+
+注意：第一活动日志及其以后的日志（序号更高的）为数据库的活动日志，不能进行移动、压缩、删除等操作，否则将造成数据库故障。
+
+    然后，请根据数据库日志文件保留时间的相关规定确定要进行处理的日志文件范围。建议至少保留60天以内的日志文件，并且不要进行压缩操作，以免损坏日志文件。
+
+
+    下面介绍对日志文件进行压缩和删除的方法。执行操作前请先用如下命令确认操作的日志文件：
+
+    find -name '*.LOG' ! -newer | more
+
+    其中，-newer 指定find命令查找最后修改时间比某个日志文件新的所有日志文件，而在前面加上 ! 取反，则返回比该日志文件旧的所有日志文件及其本身。
+    可以使用如下命令确定符合条件的日志文件的数量：
+
+    find -name '*.LOG' ! -newer | wc -l
+
+
+    如果考虑压缩陈旧的日志文件，可参考如下方法：
+
+  a.直接压缩日志文件
+
+    在日志文件目录下执行命令：find -name '*.LOG' ! -newer -exec gzip {} \;
+
+  b.将日志文件打包后压缩：目前存在/mnt/data/db2logbak/
+
+    在日志文件目录下执行命令：find -name '*.LOG' ! -newer | xargs tar -zcvf log_bak_20100402_1.tar.gz
+    然后，再将这些日志文件删除，方法稍后说明。
+
+
+    如果考虑删除陈旧的日志文件，可参考如下方法：
+
+  a.使用操作系统命令直接删除
+
+    在日志文件目录下执行命令：find -name '*.LOG' ! -newer -exec rm {} \;
+
+  b.使用数据库命令进行清除
+
+    执行命令：db2 prune logfile prior to S0003270.LOG
+    该命令会清除S0003270.LOG之前所有的在线档案日志文件（不包括S0003270.LOG本身）。
+
+
+2、        检查备份和日志是否都保存好了
+
+通过 tar -tvf /dev/st0 命令查看磁带的内容，确认显示结果中有最新的备份文件。当磁带中的备份文件较多时，这个操作可能花费很长时间。
+
+DB2日常维护季度操作
+1、        通过快照监控器，查看系统性能如何
+
+通过快照监控器，抓取数据库的信息，分析数据库性能是否合理：
+
+# db2 get snapshot for all on 数据库名 > log.txt
+
+2、        数据库补丁级别
+
+# db2level
+
+注意事项
+1、        不要删除活动日志文件0
+
+DB2 的活动日志文件不能被删除。一旦 DB2 的活动日志文件被删除，或者所在的存储设备出现问题，则不可避免地造成 DB2 数据库系统宕机。
+
+2、        注意交易日志存储空间
+
+在归档日志模式下，如果没有使用自动归档方式，则存储的日志文件会不断增多，有可能造成日志所在的文件系统空间满。 当这种情况发生时，会根据参数 BLK_LOG_DSK_FUL 的配置而有不同的现象：
+
+1）如果该参数启用，则 DB2 数据库可继续读操作，但是写操作会挂起
+
+2）如果该参数没有启用，则 DB2 数据库会停止工作
+
+
+
+两种情况下，都需要到日志所在的文件系统添加了空间才恢复正常。
+
+
+
+3、        按照系统的实际工作量配置日志空间
+
+DB2数据库通过日志文件维护数据的完整性和一致性。DB2 数据库的日志空间可通过如下公式计算：
+日志空间 = （主日志文件 + 二级日志文件） * 日志文件尺寸
+
+其中：
+1） 主日志文件由参数 LOGPRIMARY 控制，
+2） 二级日志文件由参数 LOGSECOND 控制
+3） 日志文件尺寸由参数 LOGFILSIZ 控制
+4） LOGPRIMARY + LOGSECOND < 256 （不同的 DB2 版本略有不同，请参看相同版本的 DB2 手册确认）
+4、        检查许可证（License）安装情况
+
+许可证过期会造成不必要的服务中断，所以在 DB2 安装完毕后，建议检察许可的安装情况
+5、        创建数据库前调整好系统时间
+
+在数据库创建好之后，调整系统时间会造成数据库内部时间戳的异常。数据库中一些对象和时间相关，一旦时间不准确要调整需要很小心。错误的时间调整可能会造成很多问题，如：
+1）某些对象失效，例如 ：
+SQL0440N，找不到具有兼容自变量的类型为 “<例程类型>” 的名为  “<例程名>” 的已授权例程
+2）数据库日志逻辑错误 -> 宕机
+3）常见错误 – 只调整时间，未调整时区
+6、        不要随便执行 chown (chmod) –R （UNIX/Linux）
+
+在实例目录下chown (chmod) -R 会造成
+
+1）  在数据库服务器上 db2 connect to 能连接上数据库
+
+2）  db2 connect to user ... using ...连接不上
+
+附：常用表空间扩容方法
+DB2现有表空间扩容方法
+db2 list tablespaces show detail
+
+1）直接添加一个容器的例子：
+db2 " ALTER TABLESPACE PAYROLL ADD (DEVICE '/dev/rhdisk9' 10000) "
+加容器之后DB2会有一个自动balance的过程,可能会持续几个小时!!!
+2）改变现有容器的大小(该方法不会触发balance,但如果表空间建立在裸设备上,则要扩冲裸设备空间):
+db2 " ALTER TABLESPACE TS1 RESIZE (FILE '/conts/cont0' 2000, DEVICE '/dev/rcont1' 2000, FILE 'cont2' 2000) "
+注意这种方式就是将原有的相应容器都改成大小是2000页
+db2 "ALTER TABLESPACE TS1 RESIZE (ALL 2000)"
+这种方式就是把表空间中所有的容器大小都改成2000页
+db2 " ALTER TABLESPACE TS1 EXTEND (FILE '/conts/cont0' 1000, DEVICE '/dev/rcont1' 1000, FILE 'cont2' 1000) "
+这种方式就是将相应的容器都扩大1000页，也就是增加1000页。
+db2 " ALTER TABLESPACE DATA_TS EXTEND (ALL 1000)"
+这种方式就是将所有的容器都增加1000页。
+db2 " ALTER TABLESPACE USERSPACE1 EXTEND (ALL 100)"
+附：归档日志相关知识
+db2日志保存的两种方式：循环日志和归档日志
+循环日志：
+在任何情况下都不能删除循环日志，如果删除数据库就会出错。
+如果出错了，只能用备份做恢复，如果没有做备份，那么只有找IBM官方来帮做一个连接
+然后你export出数据，然后再重建数据库。据说这个还是要在你买了PPA的情况下才提供
+的服务内容。
+归档日志：
+归档日志中的活动日志部份是不能删除的，如果删除结果同循环日志被删除的情况。
+归档日志中的已归档日志是可以删除的，但删除了以后你可能就没法做一些前滚操作了。数据库备份的恢复涉及备份文件和日志
+归档日志相关知识：
+将LOGRETAIN设置为ON后，数据库将支持前滚恢复。此时，系统中将会存在三种类型的日志文件:
+活动日志:该日志包含尚未提交或回滚的事务单元的相关信息，以及已提交但尚未写入数据库文件的事务的信息。
+联机存档日志:活动日志中所有改动对正常处理已不需要，即该日志中所记录的事务都已提交并写入数据库文件时，该活动日志转换为联机存档日志。称之为联机，是由于它们与活动日志存放在同一个目录下。
+脱机存档日志:将联机存档日志从活动日志目录下Copy到另外的地方存档，就称为脱机存档日志。这些日志可能在数据库前滚恢复的时候仍然需要。
+管理数据库日志的工作可以手工完成(即将联机存档日志手工拷贝到某个archive目录)，也可由编写USEREXIT程序自动维护。
+由于DB2对所有平台都提供了相应的USEREXIT示例程序，而且非常易于修改和使用，所以IBM建议用户使用USEREXIT程序来管理日志文件。
+使用USEREXIT程序的方法
+要使用User exit program自动化log文件的archiving和retrieval过程:
+1.  设置database cfg参数logarchmeth1 为USEREXIT。
+connect to ddn
+update db cfg using logarchmeth1 USEREXIT
+随后操作可参考>>1.8 检查归档日志相关操作
+
+
+附：使用 CLP 捕获数据库运行状况快照
+可从 CLP 使用 GET HEALTH SNAPSHOT 命令来捕获运行状况快照。该命令语法支持检索运行状况监视器监视的不同对象类型的运行状况快照信息。
+先决条件
+必须具有实例连接才能捕获运行状况快照。如果没有实例连接，则创建缺省实例连接。要获取远程实例的快照，必须先连接至该实例。
+过程
+要使用 CLP 捕获数据库运行状况快照
+从 CLP 发出带有期望参数的 GET HEALTH SNAPSHOT 命令。
+在以下示例中，将在启动数据库管理器之后立即捕获数据库管理器级别运行状况快照。
+db2 get health snapshot for dbm
+
+对于分区数据库系统，可为特定分区捕获专门的数据库快照，或者为所有分区捕获全局的数据库快照。要对特定分区（如分区号 2）上的数据库捕获运行状况快照，请发出以下命令：
+db2 get health snapshot for db on sample at dbpartitionnum 2
+要对所有分区上的所有应用程序捕获数据库快照，请发出以下命令：
+db2 get health snapshot for db on sample global
+以下命令捕获的运行状况快照带有附加详细信息，包括公式、附加信息和运行状况指示器历史记录：
+db2 get health snapshot for db on sample show detail
+
+对于基于集合状态的运行状况指示器，可对所有集合对象捕获数据库快照，而不考虑这些对象的状态。常规 GET HEALTH SNAPSHOT FOR DB 命令返回所有集合对象，这些对象需要针对所有基于集合状态的运行状况指示器的警报。
+要对列示了所有集合对象的数据库捕获运行状况快照，请发出以下命令：
+db2 get health snapshot for db on sample with full collection
+
+查看端口netstat -aon|findstr "111"
+tasklist|findstr "111"
+
+du -m * 查看当前目录文件大小mb
+find . -size 10000k 查找当前目录大于10mb的
+新增主键
+alter table trade_flow_info add constraint  PK_FXJK PRIMARY KEY (TRADE_ON_UUID);
+ alter table table_name drop primary key (col)
+
+创建db2 实例和创建库的方法大致分为两类！一类是图形界面db2setup 创建一种是CLI创建！此处只描述一下CLI方式至于图形界面请大家搜索一下吧！
+db2 创建实例 创建数据库
+1.创建实例用户
+mkdir /db2/db2test 创建实例用户目录
+smitty user
+选择Add a User
+* User NAME                                          [db2test]
+User ID                                                   []
+ADMINISTRATIVE USER?                       false
+Primary GROUP                                     [db2iadm1]
+Group SET                                           [staff]
+ADMINISTRATIVE GROUPS                   []
+ROLES                                                         []
+Another user can SU TO USER?            true
+SU GROUPS                                          [ALL]
+HOME directory                                     [/db2/db2test]
+Initial PROGRAM                                    [/usr/bin/ksh]
+
+2.创建实例 DB2_install=/usr/opt/db2_08_01/instance
+./db2icrt -u db2test db2test
+
+3.创建数据库
+su - db2test
+db2start     #此处不执行启动实例将报:SQL1032N No start database manager command was issued. SQLSTATE=57019
+db2 create db db2test
+
+4.删除数据库
+db2 drop db db2test
+db2stop
+
+5.删除实例
+cd DB2_install
+./db2idrop -f db2test # -f参数一定要添加否则删除完了会报错！
+
+6.删除用户
+smitty user
+选择Remove a User
+* User NAME                                          [db2test]                                                           +
+Remove AUTHENTICATION information?                  yes
+删除用户目录
+rm -rf db2test
+
+
+df -B 1g
+1、查看数据库页大小
+db2 get db cfg
+2、收集表状态信息
+db2 runstats on table schema.table_name
+3、查询数据表占用页的数量
+select tabname, npages from syscat.tables where tabname = 'table_name'
+4、计算表占用磁盘空间大小
+表占用磁盘空间大小 = 数据页大小 * 页数量
+查看表占磁盘空间大小：select tabname, npages*32768/(1024*1024) from syscat.tables where tabname = 'XXXXXX'
+
+db2 v9以上查看表占磁盘逻辑空间大小：select sum(x.DATA_OBJECT_P_SIZE+x.INDEX_OBJECT_P_SIZE+x.LOB_OBJECT_P_SIZE+x.LONG_OBJECT_P_SIZE+x.XML_OBJECT_P_SIZE) from SYSIBMADM.ADMINTABINFO x where TABNAME='XXXXXXX';
+select TABNAME,sum(x.DATA_OBJECT_P_SIZE+x.INDEX_OBJECT_P_SIZE+x.LOB_OBJECT_P_SIZE+x.LONG_OBJECT_P_SIZE+x.XML_OBJECT_P_SIZE) from SYSIBMADM.ADMINTABINFO x group by TABNAME;
+db2 v9以上查看数据库占用空间大小：db2 "call SYSPROC.GET_DBSIZE_INFO(?,?,?,10)"
+
+
+-- db2 delete 大表不写日志操作
+1.update command options using c off  -- //关闭自动提交
+2.alter table fxjkusr.run_rule_info  activate not logged initially //设置不记日志
+3.delete from MARPT.RPT_DIM_U_ORG_INX_M_CURR_CUS_PRO_TBK -- 删除数据
+4.commit//手动提交
+5.update command options using c on//打开自动提交
+
+、查看数据库页大小
+db2 get db cfg
+2、收集表状态信息
+db2 runstats on table schema.table_name
+3、查询数据表占用页的数量
+select tabname, npages from syscat.tables where tabname = 'table_name'
+4、计算表占用磁盘空间大小
+表占用磁盘空间大小 = 数据页大小 * 页数量
+查看表占磁盘空间大小：select tabname, npages*16384/(1024*1024) from syscat.tables where tabname = 'XXXXXX'
+
+db2 v9以上查看表占磁盘逻辑空间大小：select sum(x.DATA_OBJECT_P_SIZE+x.INDEX_OBJECT_P_SIZE+x.LOB_OBJECT_P_SIZE+x.LONG_OBJECT_P_SIZE+x.XML_OBJECT_P_SIZE) from SYSIBMADM.ADMINTABINFO x where TABNAME='XXXXXXX';
+select TABNAME,sum(x.DATA_OBJECT_P_SIZE+x.INDEX_OBJECT_P_SIZE+x.LOB_OBJECT_P_SIZE+x.LONG_OBJECT_P_SIZE+x.XML_OBJECT_P_SIZE) from SYSIBMADM.ADMINTABINFO x group by TABNAME;
+db2 v9以上查看数据库占用空间大小：db2 "call SYSPROC.GET_DBSIZE_INFO(?,?,?,10)"
+查看死锁
+db2 get snapshot for locks on fxjkdb
+杀掉死锁进程
+db2 force application (进程hander)
+导出某张表的数据
+db2 "export to pub_bizinfo.ixf of ixf select * from pub_bizinfo"
+导入某张表的数据
+表存在
+db2 "import from pub_bizinfo.ixf of ixf insert into pub_bizinfo"
+不生成日志
+db2 "load from pub_bizinfo.ixf of ixf insert into pub_bizinfo"
+表不存在
+db2 "import from pub_bizinfo.ixf of ixf create into pub_bizinfo"
+0 6 * * * $HOME/for_crontab/createTomorrowTables >> $HOME/for_crontab/mylog.log 2>&1
+0 6 * * * /root/zwk/test.sh >> /root/zwk/operate_`date +"\%Y\%m\%d"`.log 2>&1
+backup
+db2 connect to rams
+db2 quiesce db immediate
+db2 terminate
+db2 deactivate db fxjkdb
+db2 force application all
+db2 backup db fxjkdb to /home/fxjkusr/test/test
+
+select TABNAME,SUM(CARD) OVER(PARTITION BY TABNAME) from syscat.tables where tabschema='FXJKUSR';
+
+select TABNAME,sum(card) from syscat.tables where tabschema='FXJKUSR'group by TABNAME
+在linux下，不可避免的会用VIM打开一些windows下编辑过的文本文件。我们会发现文件的每行结尾都会有一个^M符号，这是因为 DOS下的编辑器和Linux编辑器对文件行末的回车符处理不一致，
+
+清理日志脚本
+46 15 * * *  find /home/rams/domains/log/* -mtime +7 |xargs rm -rf  >/dev/null 2>&1
+12 19 * * *  >/home/rams/domains/rams_domain/bin/start_rams_s1.log  >/dev/null 2>&1
+
+CMD="db2 -t "
+count=`${CMD} <<EOF | grep 'labstr' | awk '{print $1}'
+connect to srcdb;
+select count(*), 'labstr' from tbl1 where NAME='小明';
+EOF`
+echo $count\
+列出定时任务
+crontab -l
+
+对于回车符的定义：
+windows：   0D0A
+unixlinux:     0A
+MAC: 0D
+
+比较快捷的去除这些符号的方法有这么几种：
+
+（1）是用VI的命令：
+    使用vi打开文本文件
+    vi dos.txt
+    命令模式下输入
+    :set fileformat=unix
+    :w
+
+(2) VI下使用正则表达式替换
+   g/^M/s/^M//
+    或者
+   %s/^M//g
+   ctrl + v 然后 ctrl + m
+
+（3）使用sed 工具
+    sed ’s/^M//’ filename > tmp_filename
+
+（4）既然window下的回车符多了‘ ’，那么当然通过删除‘ ’ ，也可以实现：
+    tr -d " "
+
+（5）最后一个方法是本人最常用的方法，个人觉得最方便
+    在终端下敲命令：
+    $ dos2unix filename
+    直接转换成unix格式，就OK了！～
+
+
+
+java -Xms128m -Xmx256m -jar /home/.jar
+alter table FX_PRIVATE_CUST alter ID_TYPE set data type varchar(20)
+
+DB2删除重复记录得方法和其他数据库系统有何不同呢？下文为您列举了五种DB2删除重复记录的情况，希望对您有所启迪。
+设置联合主键
+alter table table_a add constraint  PK_FA PRIMARY KEY (ID_A , ID_B );
+
+select * from TRADE_FLOW_INFO where TRADE_ON_UUID in (select TRADE_ON_UUID
+from TRADE_FLOW_INFO group by TRADE_ON_UUID having count(TRADE_ON_UUID) > 1);
+
+delete from (select TRADE_ON_UUID,row_number() over(partition by TRADE_ON_UUID order by TRADE_ON_UUID) as row_num
+from TRADE_FLOW_INFO)  where row_num >1;
+
+
+delete from TRADE_FLOW_INFO_STATUS;
+
+select * from TRADE_FLOW_INFO_STATUS;
+1、查找表中多余的重复记录，重复记录是根据单个字段（peopleId）来判断
+
+select * from TRADE_FLOW_INFO where TRADE_ON_UUID in (select TRADE_ON_UUID
+from TRADE_FLOW_INFO group by TRADE_ON_UUID having count(TRADE_ON_UUID) > 1);
+
+
+2、DB2删除重复记录，重复记录是根据单个字段（peopleId）来判断，只留有rowid最小的记录
+delete from (select TRADE_ON_UUID,row_number() over(partition by TRADE_ON_UUID order by TRADE_ON_UUID) as row_num
+from TRADE_FLOW_INFO_STATUS)  where row_num >1
+3、查找表中多余的重复记录（多个字段）
+
+select * from vitae a where (a.peopleId,a.seq) in (select peopleId,seq from vitae group by peopleId,seq having count(*) > 1)
+
+4、DB2删除重复记录（多个字段），只留有rowid最小的记录
+
+delete from vitae a where (a.peopleId,a.seq) in (select peopleId,seq from vitae group by peopleId,seq having count(*) > 1) and rowid not in (select min(rowid) from vitae group by peopleId,seq having count(*)>1)
+
+5、查找表中多余的重复记录（多个字段），不包含rowid最小的记录
+
+select * from vitae a where (a.peopleId,a.seq) in (select peopleId,seq from vitae group by peopleId,seq having count(*) > 1) and rowid not in (select min(rowid) from vitae group by peopleId,seq having count(*)>1)
+你说的是jvm的内存空间吧。
+在方法（代码块）中定义一个变量时，java就在栈中为这个变量分配JVM内存空间，当超过变量的作用域后，java会自动释放掉为该变量所分配的JVM内存空间；而在堆中分配的JVM内存由java虚拟机的自动垃圾回收器来管理。
+
+JVM内存区域组成
+
+JVM内存分四种：
+
+1、栈区（stacksegment）—由编译器自动分配释放,存放函数的参数值，局部变量的值等，具体方法执行结束之后，系统自动释放JVM内存资源
+
+2、堆区（heapsegment）—一般由程序员分配释放，存放由new创建的对象和数组，jvm不定时查看这个对象，如果没有引用指向这个对象就回收
+
+3、静态区（datasegment）—存放全局变量，静态变量和字符串常量，不释放
+
+4、代码区（codesegment）—存放程序中方法的二进制代码，而且是多个对象共享一个代码空间区域
+
+在方法（代码块）中定义一个变量时，java就在栈中为这个变量分配JVM内存空间，当超过变量的作用域后，java会自动释放掉为该变量所分配的JVM内存空间；在堆中分配的JVM内存由java虚拟机的自动垃圾回收器来管理，堆的优势是可以动态分配JVM内存大小，生存期也不必事先告诉编译器，因为它是在运行时动态分配JVM内存的。缺点就是要在运行时动态分配JVM内存，存取速度较慢；栈的优势是存取速度比堆要快，缺点是存在栈中的数据大小与生存期必须是确定的无灵活性。
+
+◆java堆由Perm区和Heap区组成，Heap区则由Old区和New区组成，而New区又分为Eden区,From区,To区，Heap={Old+NEW={Eden,From,To}}，见图1所示。
+
+Heap区分两大块，一块是NEWGeneration,另一块是OldGeneration.在NewGeneration中，有一个叫Eden的空间，主要是用来存放新生的对象，还有两个SurvivorSpaces（from,to）,它们用来存放每次垃圾回收后存活下来的对象。在OldGeneration中，主要存放应用程序中生命周期长的JVM内存对象，还有个PermanentGeneration，主要用来放JVM自己的反射对象，比如类对象和方法对象等。
+
+在NewGeneration块中，垃圾回收一般用Copying的算法，速度快。每次GC的时候，存活下来的对象首先由Eden拷贝到某个SurvivorSpace,当SurvivorSpace空间满了后,剩下的live对象就被直接拷贝到OldGeneration中去。因此，每次GC后，EdenJVM内存块会被清空。在OldGeneration块中，垃圾回收一般用mark-compact的算法，速度慢些，但减少JVM内存要求.
+
+垃圾回收分多级，0级为全部(Full)的垃	圾回收，会回收OLD段中的垃圾；1级或以上为部分垃圾回收，只会回收NEW中的垃圾，JVM内存溢出通常发生于OLD段或Perm段垃圾回收后，仍然无JVM内存空间容纳新的Java对象的情况。
+
+JVM调用GC的频度还是很高的，主要两种情况下进行垃圾回收：当应用程序线程空闲；另一个是JVM内存堆不足时，会不断调用GC，若连续回收都解决不了JVM内存堆不足的问题时，就会报outofmemory错误。因为这个异常根据系统运行环境决定，所以无法预期它何时出现。
+
+根据GC的机制，程序的运行会引起系统运行环境的变化，增加GC的触发机会。为了避免这些问题，程序的设计和编写就应避免垃圾对象的JVM内存占用和GC的开销。显示调用System.GC()只能建议JVM需要在JVM内存中对垃圾对象进行回收，但不是必须马上回收，一个是并不能解决JVM内存资源耗空的局面，另外也会增加GC的消耗。
+
+◆当一个URL被访问时，JVM内存区域申请过程如下：
+
+A.JVM会试图为相关Java对象在Eden中初始化一块JVM内存区域
+
+B.当Eden空间足够时，JVM内存申请结束。否则到下一步
+
+C.JVM试图释放在Eden中所有不活跃的对象（这属于1或更高级的垃圾回收）,释放后若Eden空间仍然不足以放入新对象，则试图将部分Eden中活跃对象放入Survivor区
+
+D.Survivor区被用来作为Eden及OLD的中间交换区域，当OLD区空间足够时，Survivor区的对象会被移到Old区，否则会被保留在Survivor区
+
+E.当OLD区空间不够时，JVM会在OLD区进行完全的垃圾收集（0级）
+
+F.完全垃圾收集后，若Survivor及OLD区仍然无法存放从Eden复制过来的部分对象，导致JVM无法在Eden区为新对象创建JVM内存区域，则出现"outofmemory错误"
+
+ 使用jvmstat 之前需要配置相应环境变量，环境变量配置如下：
+
+JVMSTAT_HOME：jvmstat安装目录
+JVMSTAT_JAVA_HOME：JDK所在目录，与JAVA_HOME值相同
+
+
+        配置好两个环境变量之后就可以运行jvmstat 了，运行命令为：
+
+visualgc pid
+#windows 系统进入bat 目录后运行该命令
+#linux 系统进入bin 目录后运行该命令
+
+
+
+
+ 启动mysq数据库，net start mysql;
+ mysql-hlocalhost -uroot -p;
+
+
+ typeperf -si 5 "\Memory\Available Mbytes" "\Memory\Pages/sec"
+
+ 要显示处理器和内存计数器，请键入：
+typeperf "\Memory\Available bytes" "\processor(_total)\% processor time"
+
+要以 CSV 输出格式每三秒钟显示一次 Explorer 进程，请键入：
+typeperf "\Process(Explorer)\Thread Count" -si 3 -o typeperf.csv
+
+要在计算机 Server_name 上显示 50 个 RAS 计数器的范例，请键入：
+typeperf "\RAS port(LPT1)\Bytes Transmitted" -sc 50 -s Server_name
+
+
+
+
+如果你想允许用户myuser从ip为192.168.1.6的主机连接到mysql服务器的dk数据库，并使用mypassword作为密码
+
+GRANT ALL PRIVILEGES ON dk.* TO 'myuser'@'192.168.1.3' IDENTIFIED BY 'mypassword' WITH GRANT OPTION;
+
+FLUSH   PRIVILEGES;
+
+
+# /etc/init.d/mysql stop
+# mysqld_safe --user=mysql --skip-grant-tables --skip-networking &
+# mysql -u root mysql
+mysql> UPDATE user SET Password=PASSWORD('newpassword') where USER='root';
+mysql> FLUSH PRIVILEGES;
+mysql> quit
+# /etc/init.d/mysql restart
+# mysql -uroot -p
+Enter password: <输入新设的密码newpassword>
+
+
+
+tps(每秒事务处理量(TransactionPerSecond))
+1. 统计所有节点表空间使用率
+　　select substr(TABLESPACE_NAME,1,20) as TBSPC_NAME,bigint(TOTAL_PAGES * PAGE_SIZE)/1024/1024 as "TOTAL(MB)",used_pages*PAGE_SIZE/1024/1024 as "USED(MB)", free_pages*PAGE_SIZE/1024/1024 as "FREE(MB)" from table(snapshot_tbs_cfg('DB_NAME', -2)) as snapshot_tbs_cfg
+
+获取到当前时间为止，数据库总的TPS及Response Time；
+select current time as current_time, total_app_commits,total_act_time,total_app_commitamp - db_conn_time)as tps,total_act_time/total_app_commits as response_time from table (mon_get_database(-2))
+
+
+　　查看表空间使用率
+　　select substr(tbsp_name,1,20) as TABLESPACE_NAME,substr(tbsp_content_type,1,10) as TABLESPACE_TYPE,sum(tbsp_total_size_kb)/1024 as TOTAL_MB,sum(tbsp_used_size_kb)/1024 as USED_MB,sum(tbsp_free_size_kb)/1024 as FREE_MB,tbsp_page_size AS PAGE_SIZE from SYSIBMADM.TBSP_UTILIZATION group by tbsp_name,tbsp_content_type,tbsp_page_size
+　　order by 1
+
+asc升序   desc降序
+列出平均执行时间排前十的SQL语句
+db2 "select total_act_time/num_exec_with_metrics as a_exe_time ,substr(stmt_text,1,100) as sql from table(mon_get_pkg_cache_stmt(null,null,null,-2))where num_exec_with_metrics>=1 order by 1 desc fetch first 10 rows only"
+
+按已执行时间和耗用CPU时间由大到小列出正在运行的SQL
+db2 "select application_handle,elapsed_time_sec,total_cpu_time,rows_read,substr(stmt_text,1,40)as sql from sysibmadm.mon_current_sql order by 2 desc,3 desc"
+　　db2 call GET_DBSIZE_INFO (?,?,?,0)
+
+　　  输出参数的值
+　　  --------------------------
+　　  参数名： SNAPSHOTTIMESTAMP
+　　  参数值： 2008-05-26-10.53.06.421000
+
+　　  参数名： DATABASESIZE
+　　  参数值： 1203863552
+
+　　  参数名： DATABASECAPACITY
+　　  参数值： 4281493504
+
+　　unit=byte, byte/1024/1024=m
+
+　　db2 call GET_DBSIZE_INFO (?,?,?,0)
+
+
+
+=========DB2常用的命令======================================
+启动数据库
+  db2start
+停止数据库
+  db2stop
+连接数据库
+  db2 connect to bgj0 user db2inst using password
+读数据库管理程序配置
+  db2 get dbm cfg
+写数据库管理程序配置
+  db2 update dbm cfg using 参数名 参数值
+读数据库的配置
+  db2 connect to bgj0user db2 using pwd
+  db2 get db cfg for bgj0
+写数据库的配置
+  db2 connect to  user db2 using pwd
+  db2 update db cfg for bgj0 using 参数名 参数值
+=====================================================================
+关闭所有应用连接
+  db2 force application all
+  db2 "force application(8)"
+=====================================================================
+备份数据库
+  db2 force application all
+  db2 backup db bgj0 to d:
+  (db2 initialize tape on [url=file://\\.\tape0]\\.\tape0)
+  (db2 rewind tape on [url=file://\\.\tape0]\\.\tape0)
+  db2 backup db bgj0 to [url=file://\\.\tape0]\\.\tape0
+恢复数据库
+  db2 restore db bgj0 from d: to d:
+  db2 restore db bgj0 from [url=file://\\.\tape0]\\.\tape0 to d:
+前滚数据库
+  db2 rollforward db db3test to end of logs and complete
+  db2 rollforward db db3test to [timestamp] and complete
+  db2 rollforward db db3test to [timestamp] using local time and complete
+========================================================================
+如何查看数据库的存储过程?
+    SELECT * FROM SYSCAT.PROCEDURES
+绑定存储过程
+    db2 connect to bgj0 user db2 using pwd
+    db2 bind c:\dfplus.bnd
+拷贝存储过程到服务器上的C:\sqllib\function目录中
+=======================================================================
+
+select current date from sysibm.sysdummy1;
+values current date;
+
+--获取当前日期
+select current time from sysibm.sysdummy1;
+values current time;
+--获取当前时间戳
+select current timestamp from sysibm.sysdummy1;
+values current timestamp;
+
+--要使当前时间或当前时间戳记调整到 GMT/CUT，则把当前的时间或时间戳记减去当前时区寄存器：
+
+values current time -current timezone;
+values current timestamp -current timezone;
+
+--获取当前年份
+
+values year(current timestamp);
+
+--获取当前月
+values month(current timestamp);
+
+--获取当前日
+values day(current timestamp);
+
+--获取当前时
+values hour(current timestamp);
+
+--获取分钟
+values minute(current timestamp);
+
+--获取秒
+values second(current timestamp);
+
+--获取毫秒
+values microsecond(current timestamp);
+
+--从时间戳记单独抽取出日期和时间
+
+values date(current timestamp);
+values VARCHAR_FORMAT(current TIMESTAMP,'yyyy-mm-dd');
+values char(current date);
+values time(current timestamp);
+
+--执行日期和时间的计算
+
+values current date+1 year;
+values current date+3 years+2 months +15 days;
+values current time +5 hours -3 minutes +10 seconds;
+
+--计算两个日期之间的天数
+
+values days(current date)- days(date('2010-02-20'));
+
+--时间和日期换成字符串
+
+values char(current date);
+values char(current time);
+
+--要将字符串转换成日期或时间值
+
+values timestamp('2010-03-09-22.43.00.000000');
+values timestamp('2010-03-09 22:44:36');
+values date('2010-03-09');
+values date('03/09/2010');
+values time('22:45:27');
+values time('22.45.27');
+
+--计算两个时间戳记之间的时差：
+
+--秒的小数部分为单位
+values timestampdiff(1,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--秒为单位
+values timestampdiff(2,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--分为单位
+values timestampdiff(4,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--小时为单位
+values timestampdiff(8,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--天为单位
+values timestampdiff(16,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--周为单位
+values timestampdiff(32,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--月为单位
+values timestampdiff(64,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--季度为单位
+values timestampdiff(128,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+--年为单位
+values timestampdiff(256,char(current timestamp - timestamp('2010-01-01-00.00.00')));
+一、整库备份（备份数据为一个文件）
+
+1）备份之前断开所有连接
+
+db2 force application all
+
+2）备份
+
+db2 backup db dbname user db2admin using db2admin to d:/
+
+3）恢复
+
+db2 restore db dbname user db2admin using db2admin from d:/
+
+二、按模式备份（备份数据为多个文件）
+
+1）备份表结构
+
+db2look -d dbname -e -a -x -i db2admin -w db2admin -o d:\createdb.sql
+
+2）导出数据（进入到指定目录后执行）
+
+db2move dbname export -u db2admin -p db2admin
+
+3）导入表结构
+
+db2 -tvf createdb.sql
+
+4）导入数据（进入到指定目录后执行）
+
+db2move dbname import -u db2admin -p db2admin
+
+三、以文本方式导入导出某个表（数据量较小的表）
+
+1）导出
+
+export to d:\dbtable.txt of del select * from dbtable;
+
+2）导入
+
+import from d:\dbtable.txt  of del insert into dbtable;
+
+3）导入乱码
+
+import from d:\dbtable.txt of del modified by codepage=1208 insert into dbtable;
+
+codepage=1208 为UTF-8
+codepage=1386 为GBK
+复制代码
+导出数据：
+export to "/qdzh_db/test/201507.del" of del lobs to /qdzh_db/test select * from  pub_bizinfo where PBI_TRANTIMESTART like '201507%'
+说明：
+（1）表名test前面需要带schema名
+（2）如不确认表结构，可用命令 db2 describe table test查询
+3
+DB2在执行一个大的insert/update操作的时候报“The transaction log for the database is full.. ”错误，查了一下文档是DB2的日志文件满了的缘故。
+
+首先运行下面命令来查看DB2的日志配置信息
+
+?
+1
+$ db2 get db cfg | grep LOG
+注意其中的下面配置项
+Log file size (4KB) (LOGFILSIZ) = 1024 Number of primary log files (LOGPRIMARY) = 45 Number of secondary log files (LOGSECOND) = 20此时可以通过下面的命令来修改B2的日志配置信息
+$ db2 update db cfg using LOGFILSIZ 10240 $ db2 update db cfg using LOGPRIMARY 100 $ db2 update db cfg using LOGSECOND 100修改配置以后需要重新启动数据库实例
+$ db2stop force $ db2start最后再次查看修改后的参数，然后重新运行insert/update操作。
+导入数据：
+确认环境信息没有问题执行导入命令
+import from "/home/qdzhusr/test/201507/test.del" of del lobs from /home/qdzhusr/test/201507/ insert into pub_bizinfo
+
+load from "/home/qdzhusr/test/201507/test.del" of del lobs from /home/qdzhusr/test/201507/ insert into pub_bizinfo
+
+For2ear@
+
+COPY NO/COPY YES/NONRECOVERABLE
+
+load from "/qdzh_db/test/201508.del" of del lobs from /qdzh_db/test/ insert into pub_bizinfo NONRECOVERABLE without prompting
+
+load from aa1.ixf of ixf replace into table1 COPY NO without prompting
+
+然后db2 load from /qdzh_db/test/test.del of del terminate into pub_bizinfo
+然后 reorg table <表>
+然后就可以了！
+
+执行命令：reorg table XXX；即可。
+
+db2 force all application
+db2 quiesce db immediate
+db2 "backup db qdzhdb tablespace(userspace1)"
+
+
+导出表数据
+  db2 export to c:\dftz.txt of del select * from dftz
+  db2 export to c:\dftz.ixf of ixf select * from dftz
+导入表数据
+import from c:\123.txt of del insert into ylbx.czyxx（把123文件中的内容以DEL格式插入到ylbx模式下的czyxx表中，加至czyxx表中数据的后面）
+
+db2 import from c:\dftz.txt of del commitcount 5000 messages c:\dftz.msg insert into dftz（将c盘下dftz文件中的内容记录以del格式导至dftz表中，每5000条提交一次，并在dftz.msg文件中记录过程中的报警信息）
+
+db2 import from c:\dftz.ixf of ixf commitcount 5000 messages c:\dftz.msg insert into dftz（将c盘下dftz文件中的内容记录以ixf格式导至dftz表中，每5000条提交一次，并在dftz.msg文件中记录过程中的报警信息）
+
+db2 import from c:\dftz.ixf of ixf commitcount 5000 insert into dftz（将c盘下dftz文件中的内容记录以ixf格式导至dftz表中，每5000条提交一次）
+
+db2 import from c:\dftz.ixf of ixf commitcount 5000 insert_update into dftz（将c盘下dftz文件中的内容记录以ixf格式更新并导入dftz表中）
+
+db2 Import from c:\dftz.ixf of ixf restartcount 55 rowcount 10000 replace_create into dftz（仅ixf）（将dftz.ixf中的内容以ixf格式从第55条至第10000条的记录导至新建立的dftz表中）
+
+db2 Import from c:\dftz.ixf of ixf rowcount 10000 create into dftz（仅ixf）（将dftz.ixf中的内容以ixf格式前10000条的记录导至新建立的dftz表中）
+
+db2 import from c:\dftz.ixf of ixf commitcount 5000 replace into dftz  （将dftz表中的内容导入dftz表中并替换其所有内容，每5000条提交一次）
+======================================================================
+执行一个批处理文件
+    db2 –tf 批处理文件名
+  （文件中每一条命令用 ；结束）
+自动生成批处理文件
+======================================================================
+  建文本文件：temp.sql
+select 'runstats on table DB2.' || tabname || ' with distribution and detailed indexes all;' from syscat.tables where tabschema='DB2' and type='T';
+db2 –tf temp.sql>runstats.sql
+===============================================================
+自动生成建表（视图）语句
+在服务器上：C:\sqllib\misc目录中
+db2 connect to bgj0 user db2 using pwd
+db2look -d bgj0 -u db2inst -e -p -c c:\bgj0.txt
+============================================================================
+授权给某用户权限
+grant dbadm on database to user bb
+============================================================================
+
+select * from czyxx fetch first 1 rows only
+============================================================================
+
+db2expln -d 数据库名 -u 用户名 密码 -o 文件名|-t  -c 生成包的模式名 -p 包名
+
+=======================================================================================
+要使用SQL调用语句重组表，使用admin_cmd过程发出执行命令：
+call sysproc.admin_cmd('reorg table tablename index indexname')
+
+===========================================================================
+查看某一指定表的状态
+db2 load query table 表名
+============================================================================
+
+显示当前用户所有表
+
+　　list tables
+
+列出所有的系统表
+
+　　list tables for system
+======================做数据库的编目与反编目（即删除编目）================
+编目
+1.db2 catalog tcpip node node1 remote 172.16.170.100(本机IP地址) server 50004(可从 get dbm cfg show detail 中看出）
+2.db2 catalog db sample(要映射到的数据库在本机的别名) at node node1
+
+反编目
+1.db2 uncatalog node node1
+2.db2 uncatalog db sample
+================查看表结构==============================
+
+　　db2 describe select * from tmmsm01 (db2 describe table tmmsm01)
+
+================为表改名========================================
+
+
+db2 rename table 原始表名 to 目的表名
+
+==================修改某个操作用户的权限================
+
+
+（需要系统ROOT用户参与）
+把用户所在组通过smitty group修改所属组的操作权限参数，然后在db2 get dbm cfg show detail中通过db2 update dbm cfg for bgj0 using  SYSMON group name   DB2MON命令来修改
+
+
+=========================================================
+
+
+检查表的大小
+
+
+
+db2 select tabname，npages，fpages from syscat.tables where tabname='tabname'
+
+查看最近一次数据重组的时间的时间：
+db2 ‘select stats_time,tabname from syscat.tables where stats_time is not null Order by stats_time’|more
+
+检查是否已做过runstats：
+db2 -v "select tbname,nleaf,nlevels,stats_time from sysibm.sysindexes"
+
+为数据库做自动统计信息收集：
+db2 update db cfg for bgj0 using auto_maint on
+db2 update db cfg for bgj0 using auto_tbl_maint on
+db2 update db cfg for bgj0 using auto_runstats on
+
+收集某表中所有列上的统计信息：
+
+ runstats on table 某个模式下的表表名 on all columns
+
+上句等同于：      runstats on table 表名
+
+
+收集表和索引上的数据库统计信息，不包含分布统计信息：
+runstats on table 模式下的表 and indexes all
+
+收集表和索引上的数据库统计信息，包含分布统计信息：
+runstats on table pub_bizinfo with distribution and indexes all
+
+
+收集表上的数据库统计信息以及索引上的详细统计信息，不包含分布统计信息：
+runstats on table 模式下的表 and detailed indexes all
+
+收集表上的数据库统计信息以及索引上的详细统计信息，包含分布统计信息：
+runstats on table 模式下的表 with distribution and detailed indexes all
+
+
+收集关键列上的数据库统计信息：
+runstats on table 模式下的表 on key columns
+
+
+==============================================================
+
+检查哪个表有做过reorg
+db2 select tabname，npages，fpages from syscat.tables
+
+
+
+检查备份与重构命令的历史记录：
+db2 list history backup/reorg  all for bgj0
+
+
+=======================================================================
+
+
+执行表、索引检查是否需要做reorg，先执行reorgchk命令检，命令如下：
+db2 reorgchk update statistics on table bgj0.bgj0logevent
+
+(查看用于索引的F4，F5，F6，F7，F8这几列，如果这几列中的任何一列有星号*，则说明当前的表和/或索引应该重组。)
+
+reorgchk on table all 确定是否需要对表进行重组。这对于对所有表自动执行 runstats 很有用。
+
+===============================================================
+
+脱机方式重组表是整理表碎片最快方法。使用CLP重组表，执行：
+db2 reorg table bgj0.bgj0logevent
+
+要使用临时表空间重组表，执行：
+db2 reorg table dbname.tablename use 临时表空间名
+
+
+重组表并根据索引对行进行重新排序，执行：
+db2 reorg table bgj0.bgj0logevent index IDX_LOG_01
+
+db2 reorg indexes all for table bgj0.bgj0logevent allow read access
+
+
+=====查死锁=======================================================
+cd /db2data/db2user/db2inst/db2inst/NODE0000/SQL00001/db2event/db2detaildeadlock
+du -a|sort -rn
+
+db2evmon -path /db2data/db2user/db2inst/db2inst/NODE0000/SQL00001/db2event/db2detaildeadlock>/tmp/lock1.txt
+
+
+============监控器================================================
+
+
+
+           第一步：打开监控开关（只和get snapshot相关)
+           db2 "update monitor switches using lock ON sort ON bufferpool ON uow ON table ON statement ON"
+           db2 "update monitor switches using lock off sort off bufferpool off uow off table off statement ON"
+           db2 update dbm cfg using DFT_MON_BUFPOOL on DFT_MON_LOCK on DFT_MON_SORT on DFT_MON_STMT on  DFT_MON_TABLE on  DFT_MON_TIMESTAMP on  DFT_MON_UOW on  HEALTH_MON on
+           db2 get monitor switches
+
+           第二步：创建事件监控器
+           db2 "create event monitor monitor_all for statement,database,tables,tablespaces,deadlocks,transactions write to file '/db2data/event'"
+
+           第三步：激活事件监控器
+           db2 "set event monitor db2detaildeadlock state=1"
+           ps -ef|grep db2event
+           [bgrzl0m0][db2inst][/db2data/event]>ls
+           00000000.evt  db2event.ctl
+
+           第四步：格式化事件监控文件
+           db2evmon -db bgj0 -evm db2detaildeadlock > db2detaildeadlock.txt
+
+
+
+
+============清空监控器：===========================================
+
+查看监控器名称：ps -ef |grep db2event     (db2detaildeadlock)
+
+db2 "set event monitor db2detaildeadlock state=0"
+
+删除“  00000000.evt  db2event.ctl”文件
+
+
+db2 "set event monitor db2detaildeadlock state=1"
+
+
+
+===============快照监控器===================================================
+ db2 update dbm cfg using DFT_MON_BUFPOOL on DFT_MON_LOCK on DFT_MON_SORT on DFT_MON_STMT on  DFT_MON_TABLE on  DFT_MON_TIMESTAMP on  DFT_MON_UOW on  HEALTH_MON on
+
+ Default database monitor switches
+   Buffer pool                         (DFT_MON_BUFPOOL) = ON                         ON
+   Lock                                   (DFT_MON_LOCK) = OFF                        ON
+   Sort                                   (DFT_MON_SORT) = ON                         ON
+   Statement                              (DFT_MON_STMT) = ON                         ON
+   Table                                 (DFT_MON_TABLE) = ON                         ON
+   Timestamp                         (DFT_MON_TIMESTAMP) = ON                         ON
+   Unit of work                            (DFT_MON_UOW) = ON                         ON
+ Monitor health of instance and databases   (HEALTH_MON) = ON                         ON
+
+
+ db2 get snapshot for all on bgj0 > all_snap.out
+
+动态sql语句snapshot
+监控是否存在死锁
+grep -n "Deadlocks" all_snap.out|grep -v "= 0"|more
+
+执行频繁的语句
+grep -n "Number of execution" all_snap.out|grep -v "= 0"|sort -krn|more
+
+
+执行时间很长的语句
+grep -E "Total execution time" all_snap.out| sort -rn|more
+grep -E "Rows read" all_snap.out| sort -rn|more
+
+
+==========================================================================
+
+
+
+
+管理
+
+export 将数据库数据抽取到一个平面文件中。
+import 通过使用 IMPORT 实用程序，将数据导入到数据库。
+load query table <tbname>
+[to local-message-file][nosummary | summaryonly] [showdelta]  返回 LOAD 实用程序的进度。
+backup database <dbname> [to <path>] 执行数据库备份。
+restore database <dbname> [from <path>] 执行数据库恢复。
+get health snapshot for dbm 返回实例的正常快照信息（仅适用于 V8）。
+get health snapshot for all on <dbname> 返回数据库 <dbname> 的所有正常快照（仅适用于 V8）。
+
+管理服务器
+
+get admin cfg 返回管理服务器的配置设置。
+update admin cfg using <p> <v> 将管理服务器配置参数 <p> 更新为值 <v>。
+
+
+===============================================================
+
+
+
+ db2pd -v
+ db2pd -osinfo
+ [bgrz1d0][db2inst][/db2data/db2user/db2inst]>db2pd -help
+
+Usage:
+   -h | -help [file=<filename>]
+      Help
+   -v | -version [file=<filename>]
+      Version
+   -osinfo [disk] [file=<filename>]
+      Operating System Information
+   -dbpartitionnum <num>[,<num>]
+      Database Partition Number(s)
+   -alldbpartitionnums
+      All partition numbers
+   -database | -db <database>[,<database>]
+      Database(s)
+   -alldatabases | -alldbs
+      All Active Databases
+   -inst
+      Instance scope output
+   -file <filename>
+      All Output to Filename
+   -command <filename>
+      Read in predefined options
+   -interactive
+      Interactive
+   -full
+      Expand output to full length
+   -repeat [num sec] [count]
+      Repeat every num seconds (default 5) count times
+   -everything
+      All options on all database partitions
+
+Instance scope options:
+
+   -agents [db=<database>] [ [agent=<agentid>] | [application=<appid>] ] [file=<filename>]
+      Agents
+   -fcm [<numApps>] [file=<filename>]
+      FCM Information
+   -mempools [file=<filename>]
+      Memory Pools
+   -memsets [file=<filename>]
+       Memory Sets
+   -dbmcfg [file=<filename>]
+      DBM Config
+   -sysplex [db=<database>] [file=<filename>]
+      Sysplex List
+   -utilities [file=<filename>]
+      Utilities
+   *-fmp
+      FMP Table
+
+Database scope options:
+
+   -applications [ [application=<appid>] | [agent=<agentid>] ] [file=<filename>]
+      Applications
+   -transactions [tran=<tranhdl>] [app=<apphdl>] [file=<filename>]
+      Transactions
+   -bufferpools [file=<filename>]
+      Buffer Pools
+   -logs [file=<filename>]
+      Transaction Logs
+   -locks [tran=<tranhdl>] [file=<filename>] [showlocks] [wait]
+      Locks
+   -tablespaces [file=<filename>] [group] [tablespace=<tablespace id>]
+      Tablespaces/Containers
+   -dynamic [file=<filename>]
+      Dynamic Cache
+   -static [file=<filename>]
+      Static Cache
+   -mempools [file=<filename>]
+      Memory Pools
+   -memsets [file=<filename>]
+       Memory Sets
+   -dbcfg [file=<filename>]
+      Database Config
+   -catalogcache [file=<filename>]
+      Catalog Cache
+   -tcbstats [all|index] [tbspaceid=<tbspaceid> [tableid=<tableid>]] [file=<filename>]
+      Table Control Block Stats
+   -reorgs [file=<filename>]
+      Table Reorg Stats
+   -recovery [file=<filename>]
+      Recovery Status
+   -reopt [file=<filename>]
+      Reoptimized SQL Statements
+   -storagepaths
+      Storage Paths
+   -hadr [file=<filename>]
+      High Availability Disaster Recovery
+   -activestatements [file=<filename>]
+      Active Statement List
+
+   Examples:
+   db2pd -dbpartitionnum 0,1 -db sample -locks
+   db2pd -dbp 0,1 -database bgj0 app=<50>
+   db2pd -alldbp -alldbs
+
+
+验证数据库是否正在进行恢复的计数器，当前日志和当前LSN（日志序号）提供了日志位置，
+db2pd -db sample -recovery
+
+db2pd -logs
+
+
+db2pd -db BGJ0 -applications
+db2pd -db BGJ0 -transactions|more
+db2pd -db bgj0 -locks wait
+
+db2pd -db bgj0  -applications -dyn|more
+db2pd -db BGJ0 -applications -transactions -dynamic|more
+db2pd -db bgj0
+
+db2pd -db bgj0 -applications -transactions -dynamic|grep locks
+
+
+[bgrzl0m0][db2inst][/db2data/db2user/db2inst]>db2pd -db BGJ0 -logs
+
+Database Partition 0 -- Database BGJ0 -- Active -- Up 0 days 00:38:39 -- Date 08/06/2009 15:46:23
+
+Logs:
+Current Log Number            0
+Pages Written                 0
+Method 1 Archive Status       n/a
+Method 1 Next Log to Archive  n/a
+Method 1 First Failure        n/a
+Method 2 Archive Status       n/a
+Method 2 Next Log to Archive  n/a
+Method 2 First Failure        n/a
+
+Address            StartLSN       State      Size       Pages      Filename
+0x0780000020008118 0x0008F2488000 0x00000000 16000      16000      S0000000.LOG
+0x07800000200081B8 0x0008F6308000 0x00000000 16000      16000      S0000001.LOG
+0x0780000020008258 0x0008FA188000 0x00000000 16000      16000      S0000002.LOG
+0x07800000200082F8 0x0008FE008000 0x00000000 16000      16000      S0000003.LOG
+0x0780000020008398 0x000901E88000 0x00000000 16000      16000      S0000004.LOG
+0x0780000020008438 0x000905D08000 0x00000000 16000      16000      S0000005.LOG
+
+db2pd  -db BGJ0 -dbcfg
+db2pd  -db BGJ0 -dbmcfg
+db2pd  -db BGJ0 -bufferpools
+db2pd  -db BGJ0 -tablespaces
+db2 list tablespaces show detail|more
+db2 list tablespace containers for 4 show detail
+db2pd -db BGJ0 -reorg
+
+确定哪个事务包含锁定：
+db2pd -db bgj0 -locks showlocks wait
+
+诊断造成锁定等待的表加锁情况：
+db2pd -db bgj0 -applications （查看status为lock_wait项对应的AppHandl号）
+db2pd -db bgj0 -transactions （查看AppHandl号对应的tranhdl号）
+db2pd -db bgj0 -locks（查看tranhdl号对应的锁类型（type）与锁情况（mode））
+
+==================================================================
+
+
+db2mtrk
+   -i显示当前实例内存使用；
+   -i -v显示当前实例内存使用详细信息；
+   -d数据库内存使用情况；
+   -d -v数据库内存使用详细信息；
+   -p代理进程专用内存使用率
+   -r(interval重复使用间隔数，count是重复的次数
+
+Memory for database: BGJ0
+
+   Backup/Restore/Util Heap is of size 16384 bytes
+   Package Cache is of size 540672 bytes
+   Catalog Cache Heap is of size 131072 bytes
+   Buffer Pool Heap is of size 395689984 bytes
+   Buffer Pool Heap is of size 1254653952 bytes
+   Buffer Pool Heap is of size 42713088 bytes
+   Buffer Pool Heap is of size 704512 bytes
+   Buffer Pool Heap is of size 442368 bytes
+   Buffer Pool Heap is of size 311296 bytes
+   Buffer Pool Heap is of size 245760 bytes
+   Lock Manager Heap is of size 340508672 bytes
+   Database Heap is of size 31637504 bytes
+   Other Memory is of size 0 bytes
+   Total: 2067595264 bytes
+
+
+============================db2advis命令===========================
+
+
+
+db2 -tvf (路径)explain.ddl
+
+
+db2 update monitor switches using statement on
+
+
+create event monitor for statements write
+
+db2 set event monitor sql_trace state=1
+
+
+(执行正常的数据库活动，并开始获取应用上所有的SQL语句，直到想要的监控的时段结束。）
+
+
+db2 event monitor sql_trace state=0
+
+
+
+
+按照执行时间降序排列执行耗时最长的SQL语句，使用下列语句：
+db2 "select stmt_text,(stop_time-start_time) 'ExecutionTime(sec)' from stmt_sql_trace where stmt_operation not in(7,8,9,19) order by decimal(ExecutionTime) desc fetch first 10 rows only";
+
+
+按照频率降序排列执行次数最多的SQL语句，使用下列语句：
+db2 select distinct(stmt_text),count(*) Count from stmt_sql_trace where stmt_operation not in(7,8,9,19) group by stmt_text order by count (*) desc fetch first 10 rows only;
+
+
+按照CPU时间降序排列最耗CPU时间的SQL语句，使用下列语句：
+db2 "select stmt_text,user_cpu_time,UserCPU(sec) from stmt_sql_trace where stmt_operation not in(7,8,9,19) order by usrcpu desc fetch first 10 rows only"
+
+
+按照总排序时间降序排列排序时间最长的SQL语句，使用下列语句：
+db2 select stmt_text,total_sort_time,TotalSortTime(ms) from stmt_sql_trace where stmt_operation not in (7,8,9.19) order by decimal (total_sort_time) desc fetch first 10 rows only;
+
+
+
+
+捕获上诉每一类中的SQL语句，并将它们放置在tune.sql文件中。并将(--#set frequency <所要执行的SQL语句的次数> )命令插入到tune.sql文件中，这样可以更改工作负载中每条语句的执行频率。
+
+所得到的tune.sql类似于下面这样：
+--#set frequency 100
+SELECT DISTINCT DIVISION FROM org;
+
+
+
+为了确定哪些索引可能提高性能，按如下执行索引顾问程序：
+db2advis -d sample -i tune1.sql -t 0 -o tuneidx.sql
+其中所有被推荐可能会提高性能的索引将放置在文件tuneidx.sql中。编辑该文件，在文件开始处添加一条连接数据库的连接语句：
+db2 connect to sample user userid using password；
+并在文件末尾添加如下行命令：
+terminate；
+
+最后运行该文件以创建推荐的索引：
+db2 -tf tuneidx.sql -z tuneidx.log
+
+其中，tuneidx.log捕获tuneidx.sql的所有输出。
+
+
+
+===========测试机上测验表空间的表数据有改变后的空间大小增减============
+
+
+BGJ0下的DS_EP01里BGJ0LOGEVENT数据count数：1150525
+
+
+前台删除BGJ0LOGEVENT数据后count数（用delete删）：
+
+
+more 55.log时表空间看不出来大小增减；
+
+db2stop force
+db2start
+
+db2 connect to bgj0
+
+重构检查：（db2 reorgchk update statistics on table BGJ0.BGJ0LOGEVENT）
+重构： （db2 reorg table on BGJ0.BGJ0LOGEVENT）
+
+
+more 55.log时可看表空间有大小变动
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+delete之后能不能释放表空间
+
+原先表空间用了80%，由于库中有一张表巨大无比，所以利用长假作了delete操作，删除了其中4/5的数据，但是看表空间还是80%左右，是不是作完delete自己是不能释放表空间的阿？
+
+如果要释放表空间的话，应该怎么操作呢？谢谢
+
+
+
+(1)commit了没有？然后reorg一下，可以用runstats先分析一下目标表，其结果可以从sysstat.tables得到
+
+
+(2)不行的话export出来，删除表，再LOAD进去。
+
+
+
+注:DELETE之后的数据记录号还存在，所以数据占用量是不减少的，这是为了找回DELETE后而又想要的数据
+
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+=========生成数据库结构文件=================================
+
+
+
+db2look   -d   bgj0   -e   -c   -o   /db2bak/bgj0/structure.sql
+
+=========当前目录下生成db2support文件============================
+
+db2support . -d bgj0 -c
+
+=========DB2安装=================================================
+
+1.	开始安装
+a)	作为root用户登录，进入到安装文件目录下运行
+         ./db2_install –p DB2.ESE
+2.	创建db2管理服务器
+a)	作为root用户登录，通过以下命令创建db2管理服务器
+                dascrt –u dasuser
+3.	启动db2数据库管理器
+a)	作为db2数据库管理器用户（dasuser）登录
+b)	运行. das/bin/db2admin start命令启动数据库管理器
+4.	创建实例
+a)	作为root用户登录，通过以下命令创建64位的db2实例
+               db2icrt –u db2fenc –w 64 db2inst2
+5.	创建db2文件的链接
+a)	运行 db2ln命令
+6.	注册license
+a)	作为实例用户（db2inst）登录,运行：db2licm –a db2ese.lic命令
+7.	启动实例
+a)	作为实例用户（db2inst）登录，运行db2start命令
+8.	创建数据库
+        运行db2 create db test
+　　　　提示成功后。
+　　　　Db2 connect to test就可以连上数据库了
+
+
+
+
+========DB2参数配置=====================================
+
+1.	作为实例用户（db2inst）登录
+2.	运行db2set DB2COMM=tcpip
+3.	运行db2 update dbm cfg using svcename 50002设置服务的连接端口
+4.	设置归档日志
+    Db2 connect to dbname
+Db2 update db cfg using LOGRETAIN recovery
+注：设置了该参数，在连接数据库的时候会报backup pending
+5.	修改日志路径, 将日志文件归档至活动日志路径之外的位置
+db2 update db cfg for test using logarchmeth1 DISK:/db2log/db2archivelog
+
+
+
+
+==============数据库健康快照检查==============================
+
+db2 get health snapshot for all on bgj0 <show detail>
+
+
+
+==============================================================
+
+检查所有数据库中的读写行数对比、发生的等锁数、总的锁占用时间、单位时间内的锁占用数量、死锁或锁增加趋势、发生了多少次排序操作以及相关的时间量等数据库使用模式:
+
+
+select db_name, SNAPSHOT_TIMESTAMP,rows_read, rows_selected, lock_waits, lock_wait_time, lock_wait_time/nullif(lock_waits,0) as avg_wt_time, deadlocks, lock_escals, total_sorts, total_sort_time, total_sort_time/nullif(total_sorts,0) as avg_sort_time, sort_overflows, sort_overflows/nullif(total_sorts,0) as pct_ovflow_sorts from table (snapshot_database ('',-1)) as snapshot_db
+
+
+
+=============================================================
+
+
+获取表空间大小以及剩余可用空间大小:
+
+select substr(tablespace_name,1,120) as TBSPC_NAME,used_pages, free_pages from table (snapshot_tbs_cfg (' ', -1)) as snapshot_tbs_cfg
+
+
+
+=============================================================
+
+根据被读的频率来确定需要执行reorg或runstats命令的表:
+
+select substr(table_schema,1,10) as tbschema, substr(table_name,1,30) as tbname,rows_read,rows_written,overflow_accesses,page_reorgs from table (SNAPSHOT_TABLE(' ', -1)) as snapshot_table order by rows_read desc fetch first 10 rows only
+
+
+
+=============================================================
+
+根据被写的次数找出10张更新最频繁的表:
+
+select substr(table_schema,1,10) as tbschema,substr(table_name,1,30) as tbname, rows_read, rows_written, overflow_accesses, page_reorgs from table (SNAPSHOT_TABLE(' ', -1)) as snapshot_table order by rows_written desc fetch first 10 rows only
+
+=============================================================
+
+
+
+对于db2数据库，导入和导出表结构和数据其实很简单，只需要用到db2look和db2move两个命令即可。这两个命令都需要在客户端的命令行处理器中执行，但对于数据库服务器和客户端不在同一机器上的，需要借助catalog命令，来先完成远程数据库加载到本地，然后再进行导出导入操作。
+
+    如果是远程操作，则先需要把远程的数据库信息加载到本地，如果是本地则跳过1和2，从3开始，具体如下：
+
+       1、 catalog server 端的 node ，命令如下：
+       db2 catalog tcpip node node_name remote hostname server service_port
+       db2 uncatalog node node_name   （取消节点的编目）
+
+   其中 node_name 是由你任意起的一个结点名，结点名不能跟已有的结点名重复（可通过db2  list node directory 查看），hostname也可为IP address，service_port为端口号一般默认为50000。节点目录用于存储远程数据库的所有连通性信息。
+
+       2、 catalog 远端 DB2 数据库，命令如下：
+       db2 catalog db db_name [as alias_name] at node node_name
+     db2 uncatalog db db_name    （取消数据库的编目）
+
+      db_name 是指远程数据库的名字， alias_name 是客户端实例名（可以忽略）， db2node 是指上面你所指定的节点node ！
+
+     3、 连接数据库，命令如下：
+       db2 connect to db_name user user_name using password
+     db_name 是指数据库的名字， user_name 是数据库用户名，password是数据库密码
+
+   4、用db2look命令生成表结构的DLL脚本
+   db2look -d db_name -i user_name -w password -a -e -o d:\script.sql
+
+     db_name 是指数据库的名字， user_name 是数据库用户名，password是数据库密码
+
+   5、用db2move导出所有表的数据
+     db2move db_name export -u user_name -p password
+
+     db_name 是指数据库的名字，user_name 是数据库用户名， password是数据库密码
+
+   6、用export导出指定的表数据
+     db2 "export to d:\data\tab1.ixf of ixf lobs to d:\data\ lobfile lobs modified by lobsinsepfiles  messages d:\data\tab1.msg select * from schema_name.table_name"
+   schema_name 是表所属，table_name是表名， lobsinsepfiles 或 lobsinfile 是生成lob文件 前一个是生成每个，后面是生成到一个文件中
+
+
+   7、执行sql脚本
+    db2 -tvf d:\script.sql -z d:\script.log
+
+    8、用db2move导入所有表的数据
+     db2move db_name import -io replace -u user_name -p password
+
+    9、用import导入指定的表数据
+      db2 "import from d:\data\tab1.ixf of ixf messages d:\data\tab1.msg insert into schema_name.table_name"
+
+      DB2：查看表的索引
+select *  from SYSCAT.INDEXES  where TABNAME='表名'
+
+db2 "select  tabname  from syscat.indexes"
+
+      使用语句db2 describe indexes for  table MOBILE.TFCREGISTERINF可以查看到表索引描述
+      创建索引
+      CREATE INDEX JOB_BY_DPTON on EMPLOYEE (WORKDEPT, JOB)
+
+      DB2索引创建都应该哪些原则呢？这是很多人都提到的问题，下面就为您详细介绍DB2索引创建原则，供您参考学习。
+
+DB2索引实现是一个B+树，通过索引可以实现快速查询，避免全表扫描以此来减少IO操作。
+
+索引是对表数据的一种抽象，通过抽取有限数据，对数据的分布进行计算，以此来完成对数据的快速检索。
+
+索引创建语句
+
+CREATE INDEX <INDEX_NAME> ON <TABLE_NAME> (<COLNAME1,COLNAME2…>)
+创建索引需要注意的地方：
+
+索引应该用来提高查询速度，但是会对更新和删除操作带来负面影响，因为要同步更新索引。所以索引应该创建到更新、删除相对比读取少的表上。
+
+索引需要独立的空间进行存储和管理。索引是需要磁盘空间来存储。所以避免重复创建冗余索引。如下:
+
+“CREATE TABLE TEST_IDX (COL1 INT NOT NULL, COL2 INT NOT NULL, COL3 IN NOT NULL)”“CREATE INDEX TEST_IDX_IDX1 ON TEST_IDX (COL1, COL2, COL3)”
+已经有索引TEST_IDX_IDX1在三个列上，在创建”CREATE INDEX TEST_IDX_IDX2 ON TEST_IDX (COL1, COL2)”，这样的索引一般没有什么作用。
+
+索引用来避免表扫描。通过索引对大量数据抽取有限部分，形成一个相对少量的有序数据结构，通过对有序数据结构的查找可以快速想要查找的数据。所以索引适合建立在数据量比较大的表上，而且该表上的查询经常是根据条件查询部分数据。比如一些系统基础表，如SYSTEM表，这些表数据量小，而且经常是查询全部数据，所以这些表上建立索引对性能的影响不是很大，完全可以避免，以免对管理造成影响。
+
+创建索引的目的还有一个就是保证数据唯一性，可以利用”CREATE UNIQUE INDEX <INDEX_NAME> ON <TABLENAME> (<COLNAME>)”，来完成。
+
+主键会隐式创建索引，所以请不要在主键上创建索引浪费空间。
+
+尽量减少索引的创建。DB2路径访问优化器会根据表中所提供的索引来完成尽可能多的访问路径的成本估计。创建过多的索引意味着DB2优化器生成更多的访问路径，完成更多的访问计划成本估算，这会增加SQL语句编译时间。
+
+创建唯一索引可以避免排序。因为索引是有序数据结构，在进行扫描时，DB2会默认按照顺序输出结果，而不是按照插入先后。通过创建唯一索引可以避免排序，提高查询性能。
+
+具有大量重复数据的列上不要创建索引。在大量重复的列上创建索引没有任何意义。如下数据结构：表中字段col1有大量重复数据，其中的数据分布是按照90%的Y，和10%的N来分布。这样的列上创建索引没有任何意义。在查询条件为col1=‘Y’时，该表的索引扫描和表扫描没有特大差异。根据实践经验，列上的数据分布应该均匀，并且抽密度不能大于5 ‰。
+
+创建如下表：
+
+“CREATE TABLE TEST1 (NO INT NOT NULL, NAME CHAR(5))”
+
+“CREATE INDEX TEST1_IDX_1 ON TEST1 (NO)”
+
+“INSERT INTO TEST1 SELECT ROW_NUMBER() OVER(), CHR(INT(RAND()*75+48))||CHR(INT(RAND()*75+48))||CHR(INT(RAND()*75+48)) FROM SYSCAT.COLUMNS T1 JOIN SYSCAT.COLUMNS T2 ON T1.COLNAME!=T2.COLNAME FETCH FIRST 100 ROWS ONLY“
+
+“SELECT * FROM TEST1 WHERE NO = 50”
+
+
+
+DB2索引优化
+索引虽然能够大大提升查询效率，但是并不是对所有查询都适用的。比如对于“Select * From account where balance != 500”这样的语句，balance列上的索引基本上是无效的。（这是很好理解的，“不等于”在B+树索引中怎么能查找呢？）
+我们把查询语句中Where后面的表达式称为谓词。DB2中谓词能否使用索引的情况列表如下：
+
+
